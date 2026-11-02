@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:ender_eye"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "R": {
+      "item": "perfectmobfarmrevived:mob_shard"
+    }
+  },
+  "pattern": [
+    " # ",
+    "RDR",
+    " # "
+  ],
+  "result": {
+    "count": 1,
+    "id": "perfectmobfarmrevived:advanced_mob_shard"
+  }
+}

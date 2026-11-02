@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:nether_star"
+    },
+    "D": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "R": {
+      "item": "perfectmobfarmrevived:advanced_mob_shard"
+    }
+  },
+  "pattern": [
+    " # ",
+    "RDR",
+    " # "
+  ],
+  "result": {
+    "count": 1,
+    "id": "perfectmobfarmrevived:ultimate_mob_shard"
+  }
+}

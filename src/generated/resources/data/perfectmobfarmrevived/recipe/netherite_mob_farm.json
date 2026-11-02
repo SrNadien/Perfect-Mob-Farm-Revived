@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "B": {
+      "item": "minecraft:quartz"
+    },
+    "P": {
+      "item": "perfectmobfarmrevived:emerald_mob_farm"
+    },
+    "R": {
+      "item": "minecraft:ender_eye"
+    },
+    "V": {
+      "item": "minecraft:nether_star"
+    }
+  },
+  "pattern": [
+    "#V#",
+    "BPB",
+    "#R#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "perfectmobfarmrevived:netherite_mob_farm"
+  }
+}

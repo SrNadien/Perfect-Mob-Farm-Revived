@@ -1,0 +1,43 @@
+# Mod metadata for NeoForge 1.21.1. The placeholders are filled by the processResources task of build.gradle.
+modLoader="javafml"
+loaderVersion="${loader_version}"
+license="${license}"
+#issueTrackerURL="https://github.com/SrNadien/PerfectMobFarmRevived/issues"
+
+[[mods]]
+modId="${modid}"
+version="${mod_version}"
+displayName="${mod_named}"
+logoFile="mobfarm-banner.png"
+authors="${author}, Sweetmimike"
+credits="Original mod Perfect Mob Farm by Sweetmimike"
+description='''${mod_description}'''
+
+[[dependencies.${modid}]]
+modId="neoforge"
+type="required"
+versionRange="[${neoversion},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${modid}]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1]"
+ordering="NONE"
+side="BOTH"
+
+# Optional integrations (see the compat package)
+[[dependencies.${modid}]]
+modId="jei"
+type="optional"
+versionRange="[19,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${modid}]]
+modId="jade"
+type="optional"
+versionRange="[15,)"
+ordering="NONE"
+side="BOTH"

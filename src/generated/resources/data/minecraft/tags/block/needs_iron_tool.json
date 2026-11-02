@@ -1,0 +1,44 @@
+{
+  "values": [
+    "perfectmobfarmrevived:iron_mob_farm",
+    "perfectmobfarmrevived:iron_energy_mob_farm",
+    "perfectmobfarmrevived:gold_mob_farm",
+    "perfectmobfarmrevived:gold_energy_mob_farm",
+    "perfectmobfarmrevived:diamond_mob_farm",
+    "perfectmobfarmrevived:diamond_energy_mob_farm",
+    "perfectmobfarmrevived:emerald_mob_farm",
+    "perfectmobfarmrevived:emerald_energy_mob_farm",
+    "perfectmobfarmrevived:netherite_mob_farm",
+    "perfectmobfarmrevived:netherite_energy_mob_farm",
+    "perfectmobfarmrevived:nether_mob_farm",
+    "perfectmobfarmrevived:nether_energy_mob_farm",
+    "perfectmobfarmrevived:end_mob_farm",
+    "perfectmobfarmrevived:end_energy_mob_farm",
+    "perfectmobfarmrevived:ultimate_mob_farm",
+    "perfectmobfarmrevived:ultimate_energy_mob_farm",
+    {
+      "id": "perfectmobfarmrevived:mushashite_mob_farm",
+      "required": false
+    },
+    {
+      "id": "perfectmobfarmrevived:mushashite_energy_mob_farm",
+      "required": false
+    },
+    {
+      "id": "perfectmobfarmrevived:joanfoite_mob_farm",
+      "required": false
+    },
+    {
+      "id": "perfectmobfarmrevived:joanfoite_energy_mob_farm",
+      "required": false
+    },
+    {
+      "id": "perfectmobfarmrevived:nadienite_mob_farm",
+      "required": false
+    },
+    {
+      "id": "perfectmobfarmrevived:nadienite_energy_mob_farm",
+      "required": false
+    }
+  ]
+}

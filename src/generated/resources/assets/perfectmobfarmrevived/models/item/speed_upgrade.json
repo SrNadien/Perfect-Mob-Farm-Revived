@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "perfectmobfarmrevived:item/speed_upgrade"
+  }
+}

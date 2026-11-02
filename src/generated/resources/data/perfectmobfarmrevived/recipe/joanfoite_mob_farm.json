@@ -1,0 +1,33 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "ultimatearmoury"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "tag": "c:storage_blocks/joanfoite"
+    },
+    "B": {
+      "item": "minecraft:nether_star"
+    },
+    "P": {
+      "item": "perfectmobfarmrevived:mushashite_mob_farm"
+    },
+    "R": {
+      "tag": "c:ingots/joanfoite"
+    }
+  },
+  "pattern": [
+    "#R#",
+    "BPB",
+    "#R#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "perfectmobfarmrevived:joanfoite_mob_farm"
+  }
+}
