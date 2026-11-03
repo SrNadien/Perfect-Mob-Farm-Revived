@@ -42,7 +42,7 @@ public class PerfectMobFarm {
     public PerfectMobFarm(IEventBus modEventBus, ModContainer modContainer) {
 
         // Register the configs
-        modContainer.registerConfig(ModConfig.Type.SERVER, ServerConfigs.SPECS, "perfectmobfarmrevived-server.toml");
+        modContainer.registerConfig(ModConfig.Type.SYNCED, ServerConfigs.SPECS, "perfectmobfarmrevived-server.toml");
 
         ItemManager.register(modEventBus);
         BlockManager.register(modEventBus);

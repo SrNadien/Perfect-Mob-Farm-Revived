@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "perfectmobfarmrevived:ultimate_mob_shard"
+        "recipes": "perfectmobfarmrevived:ultimate_mob_shard"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

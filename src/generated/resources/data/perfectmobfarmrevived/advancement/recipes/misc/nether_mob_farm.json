@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "perfectmobfarmrevived:nether_mob_farm"
+        "recipes": "perfectmobfarmrevived:nether_mob_farm"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

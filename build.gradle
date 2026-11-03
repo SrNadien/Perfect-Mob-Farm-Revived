@@ -12,7 +12,7 @@ base {
     archivesName = mod_named.replace(" ", "")
 }
 
-// Minecraft 26.2 runs on Java 25
+// Minecraft 26.3 runs on Java 25
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 // Genera tambien <nombre>-sources.jar junto al jar del mod
@@ -103,7 +103,7 @@ repositories {
         }
     }
     exclusiveContent {
-        // Nexus Network (energy source for testing the energy farms in runClient), published on CurseForge
+        // Unofficial Mekanism 26.3 port (energy source for testing the energy farms in runClient), published on CurseForge
         forRepository {
             maven {
                 name = 'Curse Maven'
@@ -112,18 +112,6 @@ repositories {
         }
         filter {
             includeGroup 'curse.maven'
-        }
-    }
-    exclusiveContent {
-        // GeckoLib (required by Nexus Network)
-        forRepository {
-            maven {
-                name = 'GeckoLib'
-                url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-            }
-        }
-        filter {
-            includeGroup 'com.geckolib'
         }
     }
 }
@@ -139,11 +127,10 @@ dependencies {
     runtimeOnly "mezz.jei:jei-${mcversion}-neoforge:${jei_version}"
     runtimeOnly "maven.modrinth:jade:${jade_version}"
 
-
-    // Nexus Network (energy source, since Mekanism has no Minecraft 26.2 build) and its required dependency GeckoLib, so the
-    // energy mob farms can be powered in runClient. nexus_file_id is the CurseForge file id of nexus-neoforge-26.2-1.0.0-beta.2.
-    runtimeOnly "curse.maven:nexus-network-1732634:${nexus_file_id}"
-    runtimeOnly "com.geckolib:geckolib-neoforge-${mcversion}:${geckolib_version}"
+    // Unofficial all-in-one Mekanism port for 26.3 (CurseForge project 1777892, file Mekanism-26.3-10.8.0-unofficial.20261102.1-all.jar):
+    // it already contains Generators, Tools and Additions, so no other Mekanism jar must be added. It is the energy source to
+    // power the energy mob farms in runClient and needs NeoForge 26.3.0.100+ and Java 25.
+    runtimeOnly "curse.maven:mekanism-unofficial-26-3-port-1777892:9409128"
 }
 
 test {

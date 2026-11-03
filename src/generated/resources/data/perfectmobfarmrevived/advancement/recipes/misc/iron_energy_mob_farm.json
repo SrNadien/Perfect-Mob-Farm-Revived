@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "perfectmobfarmrevived:iron_energy_mob_farm"
+        "recipes": "perfectmobfarmrevived:iron_energy_mob_farm"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

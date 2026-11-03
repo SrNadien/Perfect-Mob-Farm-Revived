@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "perfectmobfarmrevived:advanced_mob_shard"
+        "recipes": "perfectmobfarmrevived:advanced_mob_shard"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 4.0.0 - 2026-11-02
+## 5.0.0 - 2026-11-02
 
 ### Added
 - Nether, End and Ultimate mob farms
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file.
 - Data generation for models, blockstates, language files, recipes, loot tables and tags
 
 ### Changed
-- This is the Minecraft 26.2 version of the mod (NeoForge 26.2.0.93)
+- This is the Minecraft 26.3 version of the mod (NeoForge 26.3.0.101)
 - The mod id is now `perfectmobfarmrevived` (it was `perfectmobfarm`), so blocks and items of old worlds are not kept
 - Mob shards now store their linked mob and kill count in a data component instead of NBT
 - The five mob farms now share a single parametrized block and block entity
@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 - The mod now uses the NeoForge configuration system (server config)
 
 ### Fixed
-- Resources and data packs updated to the 26.2 format (recipes, loot tables and tags)
+- Resources and data packs updated to the 26.3 format (recipes, loot tables and tags)
 
 ## 1.2.0 - 07.07.2022
 

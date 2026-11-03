@@ -1,8 +1,5 @@
 package nadiendev.perfectmobfarm.block;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import nadiendev.perfectmobfarm.block.entity.BlockEntityManager;
 import nadiendev.perfectmobfarm.block.entity.MobFarmBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -27,21 +24,11 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Locale;
 
 /**
  * Mob Farm block. One class for every tier and for both variants (normal and energy), see {@link FarmTier}.
  */
 public class MobFarmBlock extends BaseEntityBlock {
-
-    private static final Codec<FarmTier> TIER_CODEC = Codec.STRING.xmap(
-            name -> FarmTier.valueOf(name.toUpperCase(Locale.ROOT)), FarmTier::getName);
-
-    public static final MapCodec<MobFarmBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            TIER_CODEC.fieldOf("tier").forGetter(MobFarmBlock::getTier),
-            Codec.BOOL.fieldOf("uses_energy").forGetter(MobFarmBlock::usesEnergy),
-            propertiesCodec()
-    ).apply(instance, MobFarmBlock::new));
 
     public static final EnumProperty<Direction> FACING = DirectionalBlock.FACING;
 
@@ -69,11 +56,6 @@ public class MobFarmBlock extends BaseEntityBlock {
      */
     public boolean usesEnergy() {
         return usesEnergy;
-    }
-
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
     }
 
     @Nullable

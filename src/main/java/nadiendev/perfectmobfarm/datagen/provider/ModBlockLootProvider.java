@@ -2,19 +2,15 @@ package nadiendev.perfectmobfarm.datagen.provider;
 
 import nadiendev.perfectmobfarm.block.BlockManager;
 import nadiendev.perfectmobfarm.block.FarmTier;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.data.loot.LootTableProvider;
+import net.minecraft.data.loot.LootTableSubProvider;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.neoforge.registries.DeferredBlock;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 /**
@@ -23,17 +19,8 @@ import java.util.stream.Stream;
  */
 public class ModBlockLootProvider extends BlockLootSubProvider {
 
-    public ModBlockLootProvider(HolderLookup.Provider registries) {
-        super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
-    }
-
-    /**
-     * @return The loot table provider that wraps this sub provider
-     */
-    public static LootTableProvider create(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        return new LootTableProvider(output, Set.of(),
-                List.of(new LootTableProvider.SubProviderEntry(ModBlockLootProvider::new, LootContextParamSets.BLOCK)),
-                registries);
+    public ModBlockLootProvider(LootTableSubProvider.Context context) {
+        super(Set.of(), FeatureFlags.REGISTRY.allFlags(), context);
     }
 
     @Override

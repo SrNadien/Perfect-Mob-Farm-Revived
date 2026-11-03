@@ -200,7 +200,7 @@ public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity, 
         pPoseStack.translate(0.5F + pOffsetX, 0.25F + bob, 0.5F + pOffsetZ);
         pPoseStack.scale(pState.scale, pState.scale, pState.scale);
         // The spin replaces the facing of the block
-        pPoseStack.mulPose(Axis.YP.rotationDegrees(rotation));
+        pPoseStack.rotateDegrees(Axis.YP, rotation);
 
         entityRenderer.submit(pMob, pCamera, 0.0D, 0.0D, 0.0D, pPoseStack, pCollector);
         pPoseStack.popPose();

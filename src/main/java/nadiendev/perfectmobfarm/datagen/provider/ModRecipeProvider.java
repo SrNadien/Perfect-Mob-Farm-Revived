@@ -4,11 +4,11 @@ import nadiendev.perfectmobfarm.PerfectMobFarm;
 import nadiendev.perfectmobfarm.block.BlockManager;
 import nadiendev.perfectmobfarm.block.FarmTier;
 import nadiendev.perfectmobfarm.item.ItemManager;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
@@ -16,36 +16,18 @@ import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * Generates the recipes of the mod: the three mob shards, the two farm upgrades, every mob farm and every energy farm. Each farm is
  * crafted from the farm of the previous tier, and each energy farm from the normal farm of its tier.
  */
 public class ModRecipeProvider extends RecipeProvider {
 
-    private ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-        super(registries, output);
-    }
-
     /**
-     * Runs the provider: since 1.21.2 a recipe provider is created for every run with the registries and the output
+     * Since 26.3 the recipes and their advancements are datapack registry entries: the provider receives the bootstrap
+     * context of both registries instead of a pack output
      */
-    public static class Runner extends RecipeProvider.Runner {
-
-        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-            super(output, registries);
-        }
-
-        @Override
-        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
-            return new ModRecipeProvider(registries, output);
-        }
-
-        @Override
-        public String getName() {
-            return "Recipes: " + PerfectMobFarm.MODID;
-        }
+    public ModRecipeProvider(BootstrapContext<Recipe<?>> recipes, BootstrapContext<Advancement> advancements) {
+        super(recipes, advancements);
     }
 
     @Override

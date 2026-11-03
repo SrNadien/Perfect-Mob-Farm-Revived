@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "perfectmobfarmrevived:mob_slot_upgrade"
+        "recipes": "perfectmobfarmrevived:mob_slot_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
