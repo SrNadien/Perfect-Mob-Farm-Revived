@@ -1,9 +1,56 @@
 # Keeps the workflow actions current on its own. Without this, action versions
 # silently rot until a runtime deprecation breaks a release.
+#
+# Dependabot only reads this file from the default branch (Neo/1.21.1) and, without a target-branch, only updates
+# that branch. Every other version branch therefore has its own entry below.
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "Forge/1.20.1"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "Neo/26.1.2"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "Neo/26.2"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "chore"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "Neo/26.3"
     schedule:
       interval: "monthly"
     commit-message:
