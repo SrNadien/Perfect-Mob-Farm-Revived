@@ -9,7 +9,7 @@ import nadiendev.perfectmobfarm.block.FarmTier;
 import nadiendev.perfectmobfarm.config.ServerConfigs;
 import nadiendev.perfectmobfarm.item.ItemManager;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.registries.DeferredBlock;
 
@@ -31,7 +31,7 @@ public class PerfectMobFarmJeiPlugin implements IModPlugin {
     private static final DecimalFormat SECONDS_FORMAT = new DecimalFormat("0.##", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return PerfectMobFarm.id("jei_plugin");
     }
 

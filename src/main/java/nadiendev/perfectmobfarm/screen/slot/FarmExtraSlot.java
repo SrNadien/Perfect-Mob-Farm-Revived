@@ -1,10 +1,9 @@
 package nadiendev.perfectmobfarm.screen.slot;
 
+import nadiendev.perfectmobfarm.block.entity.MobFarmBlockEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
@@ -13,7 +12,7 @@ import java.util.function.Predicate;
  * Optional slot of the mob farm menu (second shard, speed upgrade, mob slot upgrade): it only exists while the
  * farm allows it, only accepts the items of its kind and can be locked so its content can not be taken out
  */
-public class FarmExtraSlot extends SlotItemHandler {
+public class FarmExtraSlot extends ResourceHandlerSlot {
 
     private final Predicate<ItemStack> validator;
     private final BooleanSupplier enabled;
@@ -24,9 +23,9 @@ public class FarmExtraSlot extends SlotItemHandler {
      * @param enabled   Whether the slot is currently available (an unavailable slot is hidden and accepts nothing)
      * @param removable Whether the content can currently be taken out
      */
-    public FarmExtraSlot(IItemHandler itemHandler, int index, int xPosition, int yPosition,
+    public FarmExtraSlot(MobFarmBlockEntity.FarmItemHandler itemHandler, int index, int xPosition, int yPosition,
                          Predicate<ItemStack> validator, BooleanSupplier enabled, BooleanSupplier removable) {
-        super(itemHandler, index, xPosition, yPosition);
+        super(itemHandler, itemHandler::set, index, xPosition, yPosition);
         this.validator = validator;
         this.enabled = enabled;
         this.removable = removable;
@@ -38,7 +37,7 @@ public class FarmExtraSlot extends SlotItemHandler {
     }
 
     @Override
-    public boolean mayPlace(@NotNull ItemStack stack) {
+    public boolean mayPlace(ItemStack stack) {
         return enabled.getAsBoolean() && validator.test(stack);
     }
 

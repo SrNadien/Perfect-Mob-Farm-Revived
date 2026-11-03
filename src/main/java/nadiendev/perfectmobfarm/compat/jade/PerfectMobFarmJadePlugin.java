@@ -16,12 +16,12 @@ public class PerfectMobFarmJadePlugin implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(MobFarmInfoProvider.INSTANCE, MobFarmBlockEntity.class);
+        registration.registerBlockDataProvider(MobFarmDataProvider.INSTANCE, MobFarmBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         // The config option (id = the provider uid) is created by Jade when the provider is registered
-        registration.registerBlockComponent(MobFarmInfoProvider.INSTANCE, MobFarmBlock.class);
+        registration.registerBlockComponent(MobFarmComponentProvider.INSTANCE, MobFarmBlock.class);
     }
 }

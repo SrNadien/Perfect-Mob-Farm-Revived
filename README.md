@@ -1,9 +1,9 @@
 # Perfect Mob Farm Revived
-Perfect Mob Farm Revived is a port of **Perfect Mob Farm**, the original mod by **Sweetmimike**, to **Minecraft 1.21.1** and **NeoForge 21.1.262**.
+Perfect Mob Farm Revived is a port of **Perfect Mob Farm**, the original mod by **Sweetmimike**, to **Minecraft 26.1.2** and **NeoForge 26.1.2.126**.
 
 ## Presentation
 
-Perfect Mob Farm Revived is a simple mod for Minecraft **1.21.1** (NeoForge) that adds new blocks called Mob Farms. These new blocks allow the player to generate loot passively after having correctly setup the mob farms.
+Perfect Mob Farm Revived is a simple mod for Minecraft **26.1.2** (NeoForge) that adds new blocks called Mob Farms. These new blocks allow the player to generate loot passively after having correctly setup the mob farms.
 
 To setup a mob farm, first you have to craft a **Mob Shard** and link it to a mob type by right clicking on the mob you want to generate loot. Then, when your mob shard is linked to a mob, you have to fill it by killing mob of the same type. Finally, just put the shard in the mob farm, put a container (chest, hopper...) right below it and enjoy ! Your mob farm will start **generating** loot.
 
@@ -88,7 +88,7 @@ When [Ultimate Armoury: Tools And Weapons](https://www.curseforge.com/minecraft/
 This project is under the MIT License.
 
 ## Credits
-Perfect Mob Farm was created by **Sweetmimike**. This port to 1.21.1 NeoForge is maintained by **SrNadien**.
+Perfect Mob Farm was created by **Sweetmimike**. This port to 26.1.2 NeoForge is maintained by **SrNadien**.
 
 Perfect Mob farm is inspired by [Tiny Mob farm](https://www.curseforge.com/minecraft/mc-mods/tiny-mob-farm).
 

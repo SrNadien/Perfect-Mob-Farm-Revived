@@ -16,17 +16,20 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Inventory;
@@ -49,11 +52,14 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemUtil;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -124,26 +130,26 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
      * Cache of the item handler of the container below (server side only, created on first use)
      */
     @Nullable
-    private BlockCapabilityCache<IItemHandler, Direction> containerCache;
+    private BlockCapabilityCache<ResourceHandler<ItemResource>, Direction> containerCache;
 
     /**
      * Shard slots: slot 0 is always usable, slot 1 only while a {@link MobSlotUpgrade} is installed
      */
-    private final ItemStackHandler itemHandler = new ItemStackHandler(SHARD_SLOTS) {
+    private final FarmItemHandler itemHandler = new FarmItemHandler(SHARD_SLOTS) {
         @Override
-        protected void onContentsChanged(int slot) {
+        protected void onContentsChanged(int slot, ItemStack previousContents) {
             isActive = computeActive();
             timer = 0;
             notifyChanged();
         }
 
         @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            return stack.getItem() instanceof MobShard && isShardSlotUsable(slot);
+        public boolean isValid(int slot, ItemResource resource) {
+            return resource.getItem() instanceof MobShard && isShardSlotUsable(slot);
         }
 
         @Override
-        public int getSlotLimit(int slot) {
+        protected int getCapacity(int slot, ItemResource resource) {
             return 1;
         }
     };
@@ -152,35 +158,35 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
      * Upgrade slots: {@link #UPGRADE_SPEED} holds up to 4 {@link SpeedUpgrade}, {@link #UPGRADE_MOB_SLOT} one
      * {@link MobSlotUpgrade}
      */
-    private final ItemStackHandler upgradeHandler = new ItemStackHandler(UPGRADE_SLOTS) {
+    private final FarmItemHandler upgradeHandler = new FarmItemHandler(UPGRADE_SLOTS) {
         @Override
-        protected void onContentsChanged(int slot) {
+        protected void onContentsChanged(int slot, ItemStack previousContents) {
             // The second shard slot may have been enabled or disabled
             isActive = computeActive();
             notifyChanged();
         }
 
         @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
+        public boolean isValid(int slot, ItemResource resource) {
             return switch (slot) {
-                case UPGRADE_SPEED -> stack.getItem() instanceof SpeedUpgrade && getTier().supportsSpeedUpgrade();
-                case UPGRADE_MOB_SLOT -> stack.getItem() instanceof MobSlotUpgrade;
+                case UPGRADE_SPEED -> resource.getItem() instanceof SpeedUpgrade && getTier().supportsSpeedUpgrade();
+                case UPGRADE_MOB_SLOT -> resource.getItem() instanceof MobSlotUpgrade;
                 default -> false;
             };
         }
 
         @Override
-        public int getSlotLimit(int slot) {
+        protected int getCapacity(int slot, ItemResource resource) {
             return slot == UPGRADE_SPEED ? MAX_SPEED_UPGRADES : 1;
         }
 
         @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+        public int extract(int slot, ItemResource resource, int amount, TransactionContext transaction) {
             // The mob slot upgrade stays while the second shard slot holds a shard
             if (slot == UPGRADE_MOB_SLOT && !itemHandler.getStackInSlot(1).isEmpty()) {
-                return ItemStack.EMPTY;
+                return 0;
             }
-            return super.extractItem(slot, amount, simulate);
+            return super.extract(slot, resource, amount, transaction);
         }
     };
 
@@ -275,7 +281,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
         int energyUsed = 0;
         if (energyStorage != null && getNearbyContainer() != null) {
             energyUsed = getTier().getEnergyPerTick();
-            if (energyStorage.getEnergyStored() < energyUsed) {
+            if (energyStorage.getAmountAsInt() < energyUsed) {
                 return;
             }
         }
@@ -341,7 +347,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
             return;
         }
 
-        IItemHandler container = null;
+        ResourceHandler<ItemResource> container = null;
         boolean generatedAny = false;
         for (int slot = 0; slot < SHARD_SLOTS; slot++) {
             ItemStack mobShard = itemHandler.getStackInSlot(slot);
@@ -382,8 +388,9 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
      * @param container   Container below the farm
      * @return True if the loot was generated (at least one item placed, or air generated) and the shard was damaged
      */
-    private boolean generateShardDrop(ServerLevel serverLevel, int slot, ItemStack mobShard, MobShardData data, IItemHandler container) {
-        ResourceLocation loc = ResourceLocation.tryParse(data.lootTable());
+    private boolean generateShardDrop(ServerLevel serverLevel, int slot, ItemStack mobShard, MobShardData data,
+                                     ResourceHandler<ItemResource> container) {
+        Identifier loc = Identifier.tryParse(data.lootTable());
         if (loc == null) {
             LOGGER.error("In generateDrop(): Invalid loot table location {}.", data.lootTable());
             return false;
@@ -416,7 +423,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
                 canBePlaced = true;
                 continue;
             }
-            ItemStack remainingStack = ItemHandlerHelper.insertItemStacked(container, itemStack, false);
+            ItemStack remainingStack = ItemUtil.insertItemReturnRemaining(container, itemStack, false, null);
 
             // If the counts are different, then at least one item as been placed
             if (itemStack.getCount() != remainingStack.getCount()) {
@@ -468,19 +475,19 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
      * @return The item handler below, or null if there is none
      */
     @Nullable
-    public IItemHandler getNearbyContainer() {
+    public ResourceHandler<ItemResource> getNearbyContainer() {
         if (level == null) {
             return null;
         }
         // On the server a capability cache avoids a full lookup each tick
         if (level instanceof ServerLevel serverLevel) {
             if (containerCache == null) {
-                containerCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, serverLevel,
+                containerCache = BlockCapabilityCache.create(Capabilities.Item.BLOCK, serverLevel,
                         getBlockPos().below(), Direction.UP);
             }
             return containerCache.getCapability();
         }
-        return level.getCapability(Capabilities.ItemHandler.BLOCK, getBlockPos().below(), Direction.UP);
+        return level.getCapability(Capabilities.Item.BLOCK, getBlockPos().below(), Direction.UP);
     }
 
     /**
@@ -527,8 +534,8 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     /**
      * Drop on the ground every stack of a handler
      */
-    private void dropContents(ItemStackHandler handler) {
-        for (int slot = 0; slot < handler.getSlots(); slot++) {
+    private void dropContents(FarmItemHandler handler) {
+        for (int slot = 0; slot < handler.size(); slot++) {
             ItemStack itemStack = handler.getStackInSlot(slot);
             if (!itemStack.isEmpty()) {
                 Containers.dropItemStack(level, getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ(), itemStack);
@@ -570,28 +577,36 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
-        super.loadAdditional(pTag, pRegistries);
-        // The "Size" entry is dropped: a farm saved with the old single slot handler must keep the new handler size
-        itemHandler.deserializeNBT(pRegistries, withoutSize(pTag.getCompound("inventory")));
-        upgradeHandler.deserializeNBT(pRegistries, withoutSize(pTag.getCompound("upgrades")));
+    protected void loadAdditional(ValueInput pInput) {
+        super.loadAdditional(pInput);
+        itemHandler.deserialize(pInput.childOrEmpty("inventory"));
+        upgradeHandler.deserialize(pInput.childOrEmpty("upgrades"));
         isActive = computeActive();
-        timer = pTag.getInt("timer");
+        timer = pInput.getIntOr("timer", 0);
         if (energyStorage != null) {
-            energyStorage.energy = Math.max(0, pTag.getInt("energy"));
+            energyStorage.deserialize(pInput);
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
-        super.saveAdditional(pTag, pRegistries);
-        pTag.put("inventory", itemHandler.serializeNBT(pRegistries));
-        pTag.put("upgrades", upgradeHandler.serializeNBT(pRegistries));
-        pTag.putBoolean("isActive", isActive);
-        pTag.putInt("timer", timer);
+    protected void saveAdditional(ValueOutput pOutput) {
+        super.saveAdditional(pOutput);
+        itemHandler.serialize(pOutput.child("inventory"));
+        upgradeHandler.serialize(pOutput.child("upgrades"));
+        pOutput.putBoolean("isActive", isActive);
+        pOutput.putInt("timer", timer);
         if (energyStorage != null) {
-            pTag.putInt("energy", energyStorage.energy);
+            energyStorage.serialize(pOutput);
         }
+    }
+
+    /**
+     * Called when the block is replaced or removed: drop the shards and the upgrades
+     */
+    @Override
+    public void preRemoveSideEffects(BlockPos pPos, BlockState pState) {
+        super.preRemoveSideEffects(pPos, pState);
+        drop();
     }
 
     @Override
@@ -605,23 +620,17 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    private static CompoundTag withoutSize(CompoundTag handlerTag) {
-        CompoundTag copy = handlerTag.copy();
-        copy.remove("Size");
-        return copy;
-    }
-
     /**
      * @return The shard slots (size {@link #SHARD_SLOTS}, slot 0 is always usable, see {@link #isShardSlotUsable(int)})
      */
-    public ItemStackHandler getItemHandler() {
+    public FarmItemHandler getItemHandler() {
         return itemHandler;
     }
 
     /**
      * @return The upgrade slots (size {@link #UPGRADE_SLOTS}): {@link #UPGRADE_SPEED} and {@link #UPGRADE_MOB_SLOT}
      */
-    public ItemStackHandler getUpgradeHandler() {
+    public FarmItemHandler getUpgradeHandler() {
         return upgradeHandler;
     }
 
@@ -662,21 +671,21 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
      * @return Energy (FE) stored, always 0 for the normal variant
      */
     public int getEnergyStored() {
-        return energyStorage == null ? 0 : energyStorage.getEnergyStored();
+        return energyStorage == null ? 0 : energyStorage.getAmountAsInt();
     }
 
     /**
      * @return Size of the energy buffer (FE), always 0 for the normal variant
      */
     public int getEnergyCapacity() {
-        return energyStorage == null ? 0 : energyStorage.getMaxEnergyStored();
+        return energyStorage == null ? 0 : energyStorage.getCapacityAsInt();
     }
 
     /**
      * @return The energy storage (receive only), or null for the normal variant
      */
     @Nullable
-    public IEnergyStorage getEnergyStorage() {
+    public EnergyHandler getEnergyStorage() {
         return energyStorage;
     }
 
@@ -693,7 +702,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
      */
     public boolean isEnergyStarved() {
         return energyStorage != null && isActive && !redstoneDisabled
-                && energyStorage.getEnergyStored() < getTier().getEnergyPerTick();
+                && energyStorage.getAmountAsInt() < getTier().getEnergyPerTick();
     }
 
     /**
@@ -752,57 +761,67 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     /**
+     * Item handler of the farm (shards or upgrades). Besides the resource handler API it gives direct access to the
+     * stacks, because the farm damages the shards in place.
+     */
+    public static class FarmItemHandler extends ItemStacksResourceHandler {
+
+        public FarmItemHandler(int size) {
+            super(size);
+        }
+
+        /**
+         * @param slot Slot index
+         * @return The stack of the slot itself, not a copy
+         */
+        public ItemStack getStackInSlot(int slot) {
+            return stacks.get(slot);
+        }
+
+        /**
+         * Replace the stack of a slot
+         */
+        public void setStackInSlot(int slot, ItemStack stack) {
+            set(slot, ItemResource.of(stack), stack.getCount());
+        }
+    }
+
+    /**
      * Energy buffer of the energy farms: accepts energy from every side, never gives it back.
      * The capacity is read live from the config through the tier.
      */
-    private final class FarmEnergyStorage implements IEnergyStorage {
+    private final class FarmEnergyStorage extends SimpleEnergyHandler {
 
-        private int energy;
-
-        @Override
-        public int receiveEnergy(int toReceive, boolean simulate) {
-            int accepted = Math.min(toReceive, getMaxEnergyStored() - getEnergyStored());
-            if (accepted <= 0) {
-                return 0;
-            }
-            if (!simulate) {
-                energy = getEnergyStored() + accepted;
-                setChanged();
-            }
-            return accepted;
+        private FarmEnergyStorage() {
+            super(0, Integer.MAX_VALUE, 0);
         }
 
         @Override
-        public int extractEnergy(int toExtract, boolean simulate) {
-            return 0;
+        public int insert(int amount, TransactionContext transaction) {
+            capacity = getTier().getEnergyCapacity();
+            return super.insert(amount, transaction);
         }
 
         /**
          * Use energy for the work of the farm (not an extraction through the capability)
          */
         private void consume(int amount) {
-            energy = Math.max(0, getEnergyStored() - amount);
-            setChanged();
+            set(Math.max(0, getAmountAsInt() - amount));
         }
 
         @Override
-        public int getEnergyStored() {
-            return Math.min(energy, getMaxEnergyStored());
+        public long getAmountAsLong() {
+            return Math.min(energy, getCapacityAsLong());
         }
 
         @Override
-        public int getMaxEnergyStored() {
+        public long getCapacityAsLong() {
             return getTier().getEnergyCapacity();
         }
 
         @Override
-        public boolean canExtract() {
-            return false;
-        }
-
-        @Override
-        public boolean canReceive() {
-            return true;
+        protected void onEnergyChanged(int previousAmount) {
+            setChanged();
         }
     }
 
@@ -817,7 +836,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     private Mob getOrCreateMobToLoot(int slot, EntityType<?> entityType) {
         Mob cached = mobsToLoot[slot];
         if (cached == null || cached.getType() != entityType) {
-            Entity created = entityType.create(this.level);
+            Entity created = entityType.create(this.level, EntitySpawnReason.LOAD);
             cached = created instanceof Mob mob ? mob : null;
             mobsToLoot[slot] = cached;
         }

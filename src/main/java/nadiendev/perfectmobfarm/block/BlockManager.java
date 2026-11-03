@@ -3,20 +3,19 @@ package nadiendev.perfectmobfarm.block;
 import nadiendev.perfectmobfarm.PerfectMobFarm;
 import nadiendev.perfectmobfarm.item.EnergyMobFarmBlockItem;
 import nadiendev.perfectmobfarm.item.ItemManager;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * Manager for the mod blocks. A farm is only registered when its tier is available
@@ -36,12 +35,12 @@ public class BlockManager {
                 continue;
             }
             DeferredBlock<Block> farm = registerBlock(tier.getName() + "_mob_farm",
-                    () -> new MobFarmBlock(tier, false, farmProperties(tier)));
-            DeferredBlock<Block> energyFarm = BLOCKS.register(tier.getName() + "_energy_mob_farm",
-                    () -> new MobFarmBlock(tier, true, farmProperties(tier)));
+                    properties -> new MobFarmBlock(tier, false, properties), tier);
+            DeferredBlock<Block> energyFarm = BLOCKS.registerBlock(tier.getName() + "_energy_mob_farm",
+                    properties -> new MobFarmBlock(tier, true, properties), () -> farmProperties(tier));
             // The energy farm item shows its stored energy as a bar
-            ItemManager.ITEMS.register(tier.getName() + "_energy_mob_farm",
-                    () -> new EnergyMobFarmBlockItem(tier, energyFarm.get(), new Item.Properties()));
+            ItemManager.ITEMS.registerItem(tier.getName() + "_energy_mob_farm",
+                    properties -> new EnergyMobFarmBlockItem(tier, energyFarm.get(), properties.useBlockDescriptionPrefix()));
             FARMS_BY_TIER.put(tier, farm);
             ENERGY_FARMS_BY_TIER.put(tier, energyFarm);
             AVAILABLE_FARMS.add(farm);
@@ -83,8 +82,9 @@ public class BlockManager {
         return properties;
     }
 
-    private static DeferredBlock<Block> registerBlock(String name, Supplier<Block> block) {
-        DeferredBlock<Block> toReturn = BLOCKS.register(name, block);
+    private static DeferredBlock<Block> registerBlock(String name, Function<BlockBehaviour.Properties, Block> block,
+                                                      FarmTier tier) {
+        DeferredBlock<Block> toReturn = BLOCKS.registerBlock(name, block, () -> farmProperties(tier));
         ItemManager.ITEMS.registerSimpleBlockItem(name, toReturn);
         return toReturn;
     }

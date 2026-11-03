@@ -22,9 +22,10 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Locale;
 
@@ -42,7 +43,7 @@ public class MobFarmBlock extends BaseEntityBlock {
             propertiesCodec()
     ).apply(instance, MobFarmBlock::new));
 
-    public static final DirectionProperty FACING = DirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = DirectionalBlock.FACING;
 
     private final FarmTier tier;
     private final boolean usesEnergy;
@@ -92,7 +93,7 @@ public class MobFarmBlock extends BaseEntityBlock {
             }
         }
 
-        return InteractionResult.sidedSuccess(pLevel.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Nullable
@@ -109,8 +110,9 @@ public class MobFarmBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock, BlockPos pNeighborPos, boolean pMovedByPiston) {
-        super.neighborChanged(pState, pLevel, pPos, pNeighborBlock, pNeighborPos, pMovedByPiston);
+    protected void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock,
+                                   @Nullable Orientation pOrientation, boolean pMovedByPiston) {
+        super.neighborChanged(pState, pLevel, pPos, pNeighborBlock, pOrientation, pMovedByPiston);
         refreshRedstone(pLevel, pPos);
     }
 
@@ -122,19 +124,6 @@ public class MobFarmBlock extends BaseEntityBlock {
         if (!pLevel.isClientSide() && pLevel.getBlockEntity(pPos) instanceof MobFarmBlockEntity farmEntity) {
             farmEntity.refreshRedstone();
         }
-    }
-
-    @Override
-    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-
-        if (!pState.is(pNewState.getBlock())) {
-            BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
-            if (blockEntity instanceof MobFarmBlockEntity farmEntity) {
-                farmEntity.drop();
-            }
-        }
-
-        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
     }
 
     @Override

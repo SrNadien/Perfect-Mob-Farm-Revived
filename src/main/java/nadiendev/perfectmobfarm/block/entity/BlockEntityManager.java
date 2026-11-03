@@ -21,8 +21,8 @@ public class BlockEntityManager {
      * One block entity type shared by every registered mob farm block (normal and energy, only the available tiers)
      */
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MobFarmBlockEntity>> MOB_FARM = BLOCK_ENTITIES.register("mob_farm_entity",
-            () -> BlockEntityType.Builder.of(MobFarmBlockEntity::new,
-                    BlockManager.MOB_FARMS.stream().map(block -> (Block) block.get()).toArray(Block[]::new)).build(null));
+            () -> new BlockEntityType<>(MobFarmBlockEntity::new,
+                    BlockManager.MOB_FARMS.stream().map(block -> (Block) block.get()).toArray(Block[]::new)));
 
     public static void register(IEventBus eventBus) {
         BLOCK_ENTITIES.register(eventBus);

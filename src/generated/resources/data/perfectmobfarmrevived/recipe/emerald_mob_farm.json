@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:emerald"
-    },
-    "B": {
-      "item": "minecraft:magma_cream"
-    },
-    "P": {
-      "item": "perfectmobfarmrevived:diamond_mob_farm"
-    },
-    "R": {
-      "item": "minecraft:gunpowder"
-    }
+    "#": "minecraft:emerald",
+    "B": "minecraft:magma_cream",
+    "P": "perfectmobfarmrevived:diamond_mob_farm",
+    "R": "minecraft:gunpowder"
   },
   "pattern": [
     "#R#",
@@ -21,7 +13,6 @@
     "#R#"
   ],
   "result": {
-    "count": 1,
     "id": "perfectmobfarmrevived:emerald_mob_farm"
   }
 }

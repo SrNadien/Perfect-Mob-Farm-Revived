@@ -1,4 +1,4 @@
-# Mod metadata for NeoForge 1.21.1. The placeholders are filled by the processResources task of build.gradle.
+# Mod metadata for NeoForge 26.1.2. The placeholders are filled by the processResources task of build.gradle.
 modLoader="javafml"
 loaderVersion="${loader_version}"
 license="${license}"
@@ -16,14 +16,14 @@ description='''${mod_description}'''
 [[dependencies.${modid}]]
 modId="neoforge"
 type="required"
-versionRange="[${neoversion},)"
+versionRange="[26.1.2.100,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${modid}]]
 modId="minecraft"
 type="required"
-versionRange="[1.21.1]"
+versionRange="[26.1.2]"
 ordering="NONE"
 side="BOTH"
 
@@ -31,13 +31,13 @@ side="BOTH"
 [[dependencies.${modid}]]
 modId="jei"
 type="optional"
-versionRange="[19,)"
+versionRange="[29,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${modid}]]
 modId="jade"
 type="optional"
-versionRange="[15,)"
+versionRange="[26,)"
 ordering="NONE"
 side="BOTH"

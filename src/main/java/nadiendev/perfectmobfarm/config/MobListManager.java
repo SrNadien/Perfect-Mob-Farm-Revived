@@ -11,7 +11,7 @@ import nadiendev.perfectmobfarm.PerfectMobFarm;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.fml.loading.FMLPaths;
@@ -49,8 +49,8 @@ public class MobListManager {
     private static final String[] DEFAULT_BLACKLIST = {"minecraft:ender_dragon", "minecraft:wither", "minecraft:elder_guardian"};
 
     private static volatile boolean loaded = false;
-    private static Set<ResourceLocation> jsonBlacklist = Set.of();
-    private static Set<ResourceLocation> jsonWhitelist = Set.of();
+    private static Set<Identifier> jsonBlacklist = Set.of();
+    private static Set<Identifier> jsonWhitelist = Set.of();
 
     private MobListManager() {
     }
@@ -83,19 +83,19 @@ public class MobListManager {
         if (!loaded) {
             load();
         }
-        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-        if (jsonBlacklist.contains(id) || type.is(BLACKLIST_TAG)) {
+        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+        if (jsonBlacklist.contains(id) || type.builtInRegistryHolder().is(BLACKLIST_TAG)) {
             return false;
         }
         boolean whitelistEmpty = jsonWhitelist.isEmpty() && !hasEntries(WHITELIST_TAG);
-        return whitelistEmpty || jsonWhitelist.contains(id) || type.is(WHITELIST_TAG);
+        return whitelistEmpty || jsonWhitelist.contains(id) || type.builtInRegistryHolder().is(WHITELIST_TAG);
     }
 
     /**
      * @return True if the tag exists and has at least one entry. A missing or empty tag is ignored.
      */
     private static boolean hasEntries(TagKey<EntityType<?>> tag) {
-        return BuiltInRegistries.ENTITY_TYPE.getTag(tag).map(HolderSet.Named::size).orElse(0) > 0;
+        return BuiltInRegistries.ENTITY_TYPE.get(tag).map(HolderSet.Named::size).orElse(0) > 0;
     }
 
     private static void createDefaultFile(Path path, String[] mobs) {
@@ -118,8 +118,8 @@ public class MobListManager {
     /**
      * Read the {"mobs": [...]} file. An invalid file is logged and treated as empty.
      */
-    private static Set<ResourceLocation> readFile(Path path) {
-        Set<ResourceLocation> result = new HashSet<>();
+    private static Set<Identifier> readFile(Path path) {
+        Set<Identifier> result = new HashSet<>();
         try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
             JsonElement root = JsonParser.parseReader(reader);
             if (!root.isJsonObject() || !root.getAsJsonObject().has(MOBS_KEY)
@@ -128,7 +128,7 @@ public class MobListManager {
                 return Set.of();
             }
             for (JsonElement element : root.getAsJsonObject().getAsJsonArray(MOBS_KEY)) {
-                ResourceLocation id = element.isJsonPrimitive() ? ResourceLocation.tryParse(element.getAsString()) : null;
+                Identifier id = element.isJsonPrimitive() ? Identifier.tryParse(element.getAsString()) : null;
                 if (id == null) {
                     LOGGER.warn("Invalid mob id {} in {}, ignoring it", element, path);
                 } else {

@@ -2,30 +2,22 @@ package nadiendev.perfectmobfarm.event;
 
 import nadiendev.perfectmobfarm.PerfectMobFarm;
 import nadiendev.perfectmobfarm.block.entity.BlockEntityManager;
-import nadiendev.perfectmobfarm.item.ItemManager;
-import nadiendev.perfectmobfarm.item.MobShard;
 import nadiendev.perfectmobfarm.renderer.MobFarmRenderer;
+import nadiendev.perfectmobfarm.renderer.ShardCompletedProperty;
 import nadiendev.perfectmobfarm.screen.MenuManager;
 import nadiendev.perfectmobfarm.screen.MobFarmScreen;
-import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 /**
- * Client side mod bus events: screens, block entity renderers and item properties
+ * Client side mod bus events: screens, block entity renderers and item model properties
  */
 @EventBusSubscriber(modid = PerfectMobFarm.MODID, value = Dist.CLIENT)
 public class ClientModEvents {
-
-    /** 1.0 when the shard has killed enough mobs, 0.0 otherwise */
-    private static final ClampedItemPropertyFunction COMPLETED = (pStack, pLevel, pEntity, pSeed) -> {
-        return MobShard.isComplete(pStack) ? 1.0F : 0.0F;
-    };
 
     private ClientModEvents() {
     }
@@ -40,12 +32,11 @@ public class ClientModEvents {
         event.registerBlockEntityRenderer(BlockEntityManager.MOB_FARM.get(), MobFarmRenderer::new);
     }
 
+    /**
+     * The "completed" condition of the item definitions of the mob shards: true when the shard has killed enough mobs
+     */
     @SubscribeEvent
-    public static void clientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            ItemProperties.register(ItemManager.MOB_SHARD.get(), PerfectMobFarm.id("completed"), COMPLETED);
-            ItemProperties.register(ItemManager.ADVANCED_MOB_SHARD.get(), PerfectMobFarm.id("completed"), COMPLETED);
-            ItemProperties.register(ItemManager.ULTIMATE_MOB_SHARD.get(), PerfectMobFarm.id("completed"), COMPLETED);
-        });
+    public static void registerItemModelProperties(RegisterConditionalItemModelPropertyEvent event) {
+        event.register(PerfectMobFarm.id("completed"), ShardCompletedProperty.MAP_CODEC);
     }
 }

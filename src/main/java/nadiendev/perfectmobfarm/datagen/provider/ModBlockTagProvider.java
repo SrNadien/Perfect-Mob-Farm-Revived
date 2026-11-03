@@ -4,13 +4,14 @@ import nadiendev.perfectmobfarm.PerfectMobFarm;
 import nadiendev.perfectmobfarm.block.BlockManager;
 import nadiendev.perfectmobfarm.block.FarmTier;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.TagAppender;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -20,9 +21,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ModBlockTagProvider extends BlockTagsProvider {
 
-    public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
-                               @Nullable ExistingFileHelper existingFileHelper) {
-        super(output, lookupProvider, PerfectMobFarm.MODID, existingFileHelper);
+    public ModBlockTagProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
+        super(output, lookupProvider, PerfectMobFarm.MODID);
     }
 
     @Override
@@ -33,14 +33,20 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
     private void addFarms(TagKey<Block> tag) {
         var appender = tag(tag);
+        // Same tag, but by key: the optional blocks may not be registered
+        TagAppender<ResourceKey<Block>, Block> optional = TagAppender.forBuilder(getOrCreateRawBuilder(tag));
         for (FarmTier farmTier : FarmTier.values()) {
             if (farmTier.getRequiredMod() != null) {
-                appender.addOptional(PerfectMobFarm.id(farmTier.getName() + "_mob_farm"));
-                appender.addOptional(PerfectMobFarm.id(farmTier.getName() + "_energy_mob_farm"));
+                optional.addOptional(blockKey(farmTier.getName() + "_mob_farm"));
+                optional.addOptional(blockKey(farmTier.getName() + "_energy_mob_farm"));
             } else {
                 appender.add(BlockManager.getBlock(farmTier).get());
                 appender.add(BlockManager.getEnergyBlock(farmTier).get());
             }
         }
+    }
+
+    private static ResourceKey<Block> blockKey(String path) {
+        return ResourceKey.create(Registries.BLOCK, PerfectMobFarm.id(path));
     }
 }

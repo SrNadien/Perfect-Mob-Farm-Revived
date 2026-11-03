@@ -90,7 +90,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "main": "perfectmobfarmrevived:block/joanfoite_energy_mob_farm",
     "material": "ultimatearmoury:block/joanfoite_block",

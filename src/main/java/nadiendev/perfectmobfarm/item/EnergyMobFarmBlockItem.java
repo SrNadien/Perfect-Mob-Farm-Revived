@@ -5,7 +5,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
  * Block item of the energy mob farms. It shows the stored energy as a green bar under the item, like a charged
@@ -29,8 +30,8 @@ public class EnergyMobFarmBlockItem extends BlockItem {
      * @return The energy stored in the block entity data of the stack, 0 if it carries none
      */
     private static int getStoredEnergy(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data == null ? 0 : Math.max(0, data.copyTag().getInt("energy"));
+        TypedEntityData<BlockEntityType<?>> data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data == null ? 0 : Math.max(0, data.copyTagWithoutId().getIntOr("energy", 0));
     }
 
     @Override

@@ -1,10 +1,11 @@
 package nadiendev.perfectmobfarm.screen;
 
 import nadiendev.perfectmobfarm.PerfectMobFarm;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 
@@ -15,8 +16,8 @@ import java.util.Locale;
  */
 public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
 
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(PerfectMobFarm.MODID, "textures/gui/mobfarm-gui-2.png");
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath(PerfectMobFarm.MODID, "textures/gui/mobfarm-gui-2.png");
 
     /** Progress bar groove, relative to the top left corner of the gui */
     private static final int BAR_X = 152;
@@ -49,25 +50,26 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
     private static final int ENERGY_SHINE_COLOR = 0xFFFF9C94;
 
     public MobFarmScreen(MobFarmMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
-        super(pMenu, pPlayerInventory, pTitle);
+        // The size of the gui texture
+        super(pMenu, pPlayerInventory, pTitle, 176, 133);
 
-        // Change to fit to the actual gui texture
-        this.imageHeight = 133;
         this.inventoryLabelY = this.imageHeight - 94;
     }
 
     @Override
-    protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
+    public void extractBackground(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        super.extractBackground(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;
 
-        pGuiGraphics.blit(TEXTURE, x, y, 0, 0, imageWidth, imageHeight);
+        pGuiGraphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0.0F, 0.0F, imageWidth, imageHeight, 256, 256);
 
         // The bar fills from the bottom to the top
         int progress = menu.getProgress(BAR_HEIGHT);
         if (progress > 0) {
             int offset = BAR_HEIGHT - progress;
-            pGuiGraphics.blit(TEXTURE, x + BAR_X, y + BAR_Y + offset, BAR_U, BAR_V + offset, BAR_WIDTH, progress);
+            pGuiGraphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x + BAR_X, y + BAR_Y + offset, (float) BAR_U,
+                    (float) (BAR_V + offset), BAR_WIDTH, progress, 256, 256);
         }
 
         // Shard A is already part of the texture; the optional slots get a frame while they are available
@@ -86,7 +88,7 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
     /**
      * Draw a vanilla style sunken 18x18 slot frame with its top left corner at (pX, pY)
      */
-    private void renderSlotFrame(GuiGraphics pGuiGraphics, int pX, int pY) {
+    private void renderSlotFrame(GuiGraphicsExtractor pGuiGraphics, int pX, int pY) {
         // Light bottom and right edges, dark top and left edges
         pGuiGraphics.fill(pX, pY, pX + SLOT_FRAME_SIZE, pY + SLOT_FRAME_SIZE, ENERGY_LIGHT_COLOR);
         pGuiGraphics.fill(pX, pY, pX + SLOT_FRAME_SIZE - 1, pY + SLOT_FRAME_SIZE - 1, ENERGY_SHADOW_COLOR);
@@ -97,7 +99,7 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
      * Draw the energy bar with its top left frame corner at (pX, pY), like a vanilla sunken slot; it fills from
      * the left to the right
      */
-    private void renderEnergyBar(GuiGraphics pGuiGraphics, int pX, int pY) {
+    private void renderEnergyBar(GuiGraphicsExtractor pGuiGraphics, int pX, int pY) {
         // Light bottom and right edges, dark top and left edges
         pGuiGraphics.fill(pX, pY, pX + ENERGY_WIDTH + 2, pY + ENERGY_HEIGHT + 2, ENERGY_LIGHT_COLOR);
         pGuiGraphics.fill(pX, pY, pX + ENERGY_WIDTH + 1, pY + ENERGY_HEIGHT + 1, ENERGY_SHADOW_COLOR);
@@ -115,10 +117,9 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
     }
 
     @Override
-    public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        // In 1.21.1 Screen#render already draws the background (a second renderBackground call would blur twice and crash)
-        super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
-        renderTooltip(pGuiGraphics, pMouseX, pMouseY);
+    public void extractRenderState(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+        // The background is drawn by extractBackground, and the slots and the item tooltip by the parent
+        super.extractRenderState(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         renderEmptySlotTooltip(pGuiGraphics, pMouseX, pMouseY);
         renderBarTooltip(pGuiGraphics, pMouseX, pMouseY);
         renderEnergyTooltip(pGuiGraphics, pMouseX, pMouseY);
@@ -127,7 +128,7 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
     /**
      * Name the optional slot under the mouse when it is empty and nothing is held by the cursor
      */
-    private void renderEmptySlotTooltip(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
+    private void renderEmptySlotTooltip(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY) {
         if (hoveredSlot == null || !hoveredSlot.isActive() || hoveredSlot.hasItem() || !menu.getCarried().isEmpty()) {
             return;
         }
@@ -142,14 +143,14 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
             default -> null;
         };
         if (text != null) {
-            pGuiGraphics.renderTooltip(font, text, pMouseX, pMouseY);
+            pGuiGraphics.setTooltipForNextFrame(font, text, pMouseX, pMouseY);
         }
     }
 
     /**
      * Draw "elapsed s / total s" (or "Inactive", "Disabled", "No energy") when the mouse is over the progress bar
      */
-    private void renderBarTooltip(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
+    private void renderBarTooltip(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY) {
         int x = leftPos + BAR_X;
         int y = topPos + BAR_Y;
         if (pMouseX < x || pMouseX >= x + BAR_WIDTH || pMouseY < y || pMouseY >= y + BAR_HEIGHT) {
@@ -168,13 +169,13 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
         } else {
             text = Component.translatableWithFallback("gui.perfectmobfarmrevived.inactive", "Inactive");
         }
-        pGuiGraphics.renderTooltip(font, text, pMouseX, pMouseY);
+        pGuiGraphics.setTooltipForNextFrame(font, text, pMouseX, pMouseY);
     }
 
     /**
      * Draw "stored / capacity FE" when the mouse is over the energy bar of an energy farm
      */
-    private void renderEnergyTooltip(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY) {
+    private void renderEnergyTooltip(GuiGraphicsExtractor pGuiGraphics, int pMouseX, int pMouseY) {
         if (!menu.usesEnergy()) {
             return;
         }
@@ -187,6 +188,6 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
         Component text = Component.translatableWithFallback("gui.perfectmobfarmrevived.energy",
                 "%s / %s FE", String.format(Locale.ROOT, "%,d", menu.getEnergy()),
                 String.format(Locale.ROOT, "%,d", menu.getEnergyCapacity()));
-        pGuiGraphics.renderTooltip(font, text, pMouseX, pMouseY);
+        pGuiGraphics.setTooltipForNextFrame(font, text, pMouseX, pMouseY);
     }
 }

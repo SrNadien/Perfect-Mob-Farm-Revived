@@ -45,7 +45,7 @@ public class EventManager {
                     shardStack.set(DataComponentManager.MOB_SHARD_DATA.get(), new MobShardData(
                             mob.getName().getString(),
                             EntityType.getKey(mob.getType()).toString(),
-                            mob.getLootTable().location().toString(),
+                            mob.getLootTable().map(key -> key.identifier().toString()).orElse("minecraft:empty"),
                             0));
                     pPlayer.sendSystemMessage(Component.literal(mob.getDisplayName().getString() + " captured !"));
                 } else {
@@ -66,7 +66,7 @@ public class EventManager {
     public static void onPlayerKillMob(LivingDeathEvent event) {
         if (event.getSource().getEntity() instanceof Player player && !player.level().isClientSide()) {
             String killedMobId = EntityType.getKey(event.getEntity().getType()).toString();
-            for (ItemStack is : player.getInventory().items) {
+            for (ItemStack is : player.getInventory().getNonEquipmentItems()) {
                 if (is.getItem() instanceof MobShard) {
                     MobShardData data = is.get(DataComponentManager.MOB_SHARD_DATA.get());
                     if (data != null && data.mobId().equals(killedMobId)) {

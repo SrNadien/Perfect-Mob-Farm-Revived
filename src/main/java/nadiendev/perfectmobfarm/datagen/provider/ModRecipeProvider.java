@@ -6,12 +6,14 @@ import nadiendev.perfectmobfarm.block.FarmTier;
 import nadiendev.perfectmobfarm.item.ItemManager;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -27,19 +29,40 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ModRecipeProvider extends RecipeProvider {
 
-    public ModRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
+    private ModRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
+        super(registries, output);
+    }
+
+    /**
+     * Runs the provider: since 1.21.2 a recipe provider is created for every run with the registries and the output
+     */
+    public static class Runner extends RecipeProvider.Runner {
+
+        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+            super(output, registries);
+        }
+
+        @Override
+        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
+            return new ModRecipeProvider(registries, output);
+        }
+
+        @Override
+        public String getName() {
+            return "Recipes: " + PerfectMobFarm.MODID;
+        }
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput recipeOutput) {
+    protected void buildRecipes() {
+        RecipeOutput recipeOutput = this.output;
         shardRecipes(recipeOutput);
         upgradeRecipes(recipeOutput);
         farmRecipes(recipeOutput);
     }
 
     private void upgradeRecipes(RecipeOutput recipeOutput) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ItemManager.SPEED_UPGRADE.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, ItemManager.SPEED_UPGRADE.get())
                 .pattern("#R#")
                 .pattern("RDR")
                 .pattern("#R#")
@@ -47,9 +70,9 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('R', Items.REDSTONE)
                 .define('D', Items.DIAMOND)
                 .unlockedBy("has_diamond", has(Items.DIAMOND))
-                .save(recipeOutput, PerfectMobFarm.id("speed_upgrade"));
+                .save(recipeOutput, recipeId("speed_upgrade"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ItemManager.MOB_SLOT_UPGRADE.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, ItemManager.MOB_SLOT_UPGRADE.get())
                 .pattern("#E#")
                 .pattern("EDE")
                 .pattern("#E#")
@@ -57,20 +80,20 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('E', Items.EMERALD)
                 .define('D', Items.DIAMOND_BLOCK)
                 .unlockedBy("has_diamond_block", has(Items.DIAMOND_BLOCK))
-                .save(recipeOutput, PerfectMobFarm.id("mob_slot_upgrade"));
+                .save(recipeOutput, recipeId("mob_slot_upgrade"));
     }
 
     private void shardRecipes(RecipeOutput recipeOutput) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ItemManager.MOB_SHARD.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, ItemManager.MOB_SHARD.get())
                 .pattern(" # ")
                 .pattern("#D#")
                 .pattern(" # ")
                 .define('#', Items.BLAZE_POWDER)
                 .define('D', Items.DIAMOND)
                 .unlockedBy("has_blaze_powder", has(Items.BLAZE_POWDER))
-                .save(recipeOutput, PerfectMobFarm.id("mob_shard"));
+                .save(recipeOutput, recipeId("mob_shard"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ItemManager.ADVANCED_MOB_SHARD.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, ItemManager.ADVANCED_MOB_SHARD.get())
                 .pattern(" # ")
                 .pattern("RDR")
                 .pattern(" # ")
@@ -78,9 +101,9 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('D', Items.DIAMOND)
                 .define('R', ItemManager.MOB_SHARD.get())
                 .unlockedBy("has_mob_shard", has(ItemManager.MOB_SHARD.get()))
-                .save(recipeOutput, PerfectMobFarm.id("advanced_mob_shard"));
+                .save(recipeOutput, recipeId("advanced_mob_shard"));
 
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ItemManager.ULTIMATE_MOB_SHARD.get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, ItemManager.ULTIMATE_MOB_SHARD.get())
                 .pattern(" # ")
                 .pattern("RDR")
                 .pattern(" # ")
@@ -88,7 +111,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('D', Items.NETHERITE_INGOT)
                 .define('R', ItemManager.ADVANCED_MOB_SHARD.get())
                 .unlockedBy("has_advanced_mob_shard", has(ItemManager.ADVANCED_MOB_SHARD.get()))
-                .save(recipeOutput, PerfectMobFarm.id("ultimate_mob_shard"));
+                .save(recipeOutput, recipeId("ultimate_mob_shard"));
     }
 
     private void farmRecipes(RecipeOutput recipeOutput) {
@@ -103,7 +126,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 Items.EMERALD, Items.GUNPOWDER, Items.MAGMA_CREAM);
 
         // Netherite has a different layout: a nether star replaces the top middle ingredient
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, farmItem(FarmTier.NETHERITE))
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, farmItem(FarmTier.NETHERITE))
                 .pattern("#V#")
                 .pattern("BPB")
                 .pattern("#R#")
@@ -140,14 +163,14 @@ public class ModRecipeProvider extends RecipeProvider {
         RecipeOutput output = tier.getRequiredMod() == null
                 ? recipeOutput
                 : recipeOutput.withConditions(new ModLoadedCondition(tier.getRequiredMod()));
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, BlockManager.getEnergyBlock(tier).get())
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BlockManager.getEnergyBlock(tier).get())
                 .pattern(" R ")
                 .pattern("RPR")
                 .pattern(" R ")
                 .define('R', Items.REDSTONE_BLOCK)
                 .define('P', farmItem(tier))
                 .unlockedBy("has_farm", has(farmItem(tier)))
-                .save(output, PerfectMobFarm.id(tier.getName() + "_energy_mob_farm"));
+                .save(output, recipeId(tier.getName() + "_energy_mob_farm"));
     }
 
     /**
@@ -155,7 +178,7 @@ public class ModRecipeProvider extends RecipeProvider {
      */
     private void farm(RecipeOutput recipeOutput, FarmTier tier, ItemLike previous,
                       ItemLike corner, ItemLike vertical, ItemLike side) {
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, farmItem(tier))
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, farmItem(tier))
                 .pattern("#R#")
                 .pattern("BPB")
                 .pattern("#R#")
@@ -173,7 +196,7 @@ public class ModRecipeProvider extends RecipeProvider {
     private void modFarm(RecipeOutput recipeOutput, FarmTier tier, FarmTier previous) {
         TagKey<Item> storageBlocks = commonTag("storage_blocks/" + tier.getName());
         TagKey<Item> ingots = commonTag("ingots/" + tier.getName());
-        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, farmItem(tier))
+        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, farmItem(tier))
                 .pattern("#R#")
                 .pattern("BPB")
                 .pattern("#R#")
@@ -189,11 +212,15 @@ public class ModRecipeProvider extends RecipeProvider {
         return BlockManager.getBlock(tier).get();
     }
 
-    private static ResourceLocation farmId(FarmTier tier) {
-        return PerfectMobFarm.id(tier.getName() + "_mob_farm");
+    private static ResourceKey<Recipe<?>> farmId(FarmTier tier) {
+        return recipeId(tier.getName() + "_mob_farm");
+    }
+
+    private static ResourceKey<Recipe<?>> recipeId(String path) {
+        return ResourceKey.create(Registries.RECIPE, PerfectMobFarm.id(path));
     }
 
     private static TagKey<Item> commonTag(String path) {
-        return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", path));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", path));
     }
 }

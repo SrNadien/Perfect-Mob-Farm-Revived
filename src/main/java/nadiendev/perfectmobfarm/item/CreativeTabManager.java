@@ -9,10 +9,10 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -61,7 +61,7 @@ public class CreativeTabManager {
         ItemStack stack = new ItemStack(farmBlock);
         CompoundTag tag = new CompoundTag();
         tag.putInt("energy", farmBlock.getTier().getEnergyCapacity());
-        BlockItem.setBlockEntityData(stack, BlockEntityManager.MOB_FARM.get(), tag);
+        stack.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(BlockEntityManager.MOB_FARM.get(), tag));
         stack.set(DataComponents.LORE, new ItemLore(List.of(
                 Component.translatableWithFallback("tooltip." + PerfectMobFarm.MODID + ".filled_with_energy", "Filled with energy")
                         .withStyle(style -> style.withColor(ChatFormatting.GRAY).withItalic(false)))));

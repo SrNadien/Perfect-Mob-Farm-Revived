@@ -8,18 +8,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "c:storage_blocks/joanfoite"
-    },
-    "B": {
-      "item": "minecraft:nether_star"
-    },
-    "P": {
-      "item": "perfectmobfarmrevived:mushashite_mob_farm"
-    },
-    "R": {
-      "tag": "c:ingots/joanfoite"
-    }
+    "#": "#c:storage_blocks/joanfoite",
+    "B": "minecraft:nether_star",
+    "P": "perfectmobfarmrevived:mushashite_mob_farm",
+    "R": "#c:ingots/joanfoite"
   },
   "pattern": [
     "#R#",
@@ -27,7 +19,6 @@
     "#R#"
   ],
   "result": {
-    "count": 1,
     "id": "perfectmobfarmrevived:joanfoite_mob_farm"
   }
 }

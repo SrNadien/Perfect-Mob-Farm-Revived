@@ -8,18 +8,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "c:storage_blocks/nadienite"
-    },
-    "B": {
-      "item": "minecraft:nether_star"
-    },
-    "P": {
-      "item": "perfectmobfarmrevived:joanfoite_mob_farm"
-    },
-    "R": {
-      "tag": "c:ingots/nadienite"
-    }
+    "#": "#c:storage_blocks/nadienite",
+    "B": "minecraft:nether_star",
+    "P": "perfectmobfarmrevived:joanfoite_mob_farm",
+    "R": "#c:ingots/nadienite"
   },
   "pattern": [
     "#R#",
@@ -27,7 +19,6 @@
     "#R#"
   ],
   "result": {
-    "count": 1,
     "id": "perfectmobfarmrevived:nadienite_mob_farm"
   }
 }

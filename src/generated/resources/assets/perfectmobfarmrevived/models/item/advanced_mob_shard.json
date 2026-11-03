@@ -1,13 +1,5 @@
 {
   "parent": "minecraft:item/generated",
-  "overrides": [
-    {
-      "model": "perfectmobfarmrevived:item/advanced_mob_shard_completed",
-      "predicate": {
-        "perfectmobfarmrevived:completed": 1.0
-      }
-    }
-  ],
   "textures": {
     "layer0": "perfectmobfarmrevived:item/advanced_mob_shard"
   }

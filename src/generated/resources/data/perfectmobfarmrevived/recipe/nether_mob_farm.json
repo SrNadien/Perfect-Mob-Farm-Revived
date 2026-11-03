@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:netherite_ingot"
-    },
-    "B": {
-      "item": "minecraft:wither_skeleton_skull"
-    },
-    "P": {
-      "item": "perfectmobfarmrevived:netherite_mob_farm"
-    },
-    "R": {
-      "item": "minecraft:blaze_rod"
-    }
+    "#": "minecraft:netherite_ingot",
+    "B": "minecraft:wither_skeleton_skull",
+    "P": "perfectmobfarmrevived:netherite_mob_farm",
+    "R": "minecraft:blaze_rod"
   },
   "pattern": [
     "#R#",
@@ -21,7 +13,6 @@
     "#R#"
   ],
   "result": {
-    "count": 1,
     "id": "perfectmobfarmrevived:nether_mob_farm"
   }
 }

@@ -90,7 +90,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "main": "perfectmobfarmrevived:block/end_mob_farm",
     "material": "minecraft:block/end_stone_bricks",

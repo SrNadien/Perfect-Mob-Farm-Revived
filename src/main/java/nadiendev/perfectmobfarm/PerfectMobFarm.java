@@ -9,7 +9,7 @@ import nadiendev.perfectmobfarm.item.CreativeTabManager;
 import nadiendev.perfectmobfarm.item.DataComponentManager;
 import nadiendev.perfectmobfarm.item.ItemManager;
 import nadiendev.perfectmobfarm.screen.MenuManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -30,13 +30,13 @@ public class PerfectMobFarm {
     public static final String MODID = "perfectmobfarmrevived";
 
     /**
-     * Build a ResourceLocation inside the mod namespace
+     * Build an Identifier inside the mod namespace
      *
      * @param path Path of the resource
-     * @return The ResourceLocation
+     * @return The Identifier
      */
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MODID, path);
     }
 
     public PerfectMobFarm(IEventBus modEventBus, ModContainer modContainer) {
@@ -67,10 +67,10 @@ public class PerfectMobFarm {
      * (every side, receive only) to the other blocks
      */
     private void registerCapabilities(final RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, BlockEntityManager.MOB_FARM.get(),
+        event.registerBlockEntity(Capabilities.Item.BLOCK, BlockEntityManager.MOB_FARM.get(),
                 (blockEntity, side) -> blockEntity.getItemHandler());
         // The normal farms return null, so they expose no energy capability
-        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, BlockEntityManager.MOB_FARM.get(),
+        event.registerBlockEntity(Capabilities.Energy.BLOCK, BlockEntityManager.MOB_FARM.get(),
                 (blockEntity, side) -> blockEntity.getEnergyStorage());
     }
 }

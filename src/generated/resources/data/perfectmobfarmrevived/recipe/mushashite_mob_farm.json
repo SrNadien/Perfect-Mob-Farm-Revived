@@ -8,18 +8,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "tag": "c:storage_blocks/mushashite"
-    },
-    "B": {
-      "item": "minecraft:nether_star"
-    },
-    "P": {
-      "item": "perfectmobfarmrevived:ultimate_mob_farm"
-    },
-    "R": {
-      "tag": "c:ingots/mushashite"
-    }
+    "#": "#c:storage_blocks/mushashite",
+    "B": "minecraft:nether_star",
+    "P": "perfectmobfarmrevived:ultimate_mob_farm",
+    "R": "#c:ingots/mushashite"
   },
   "pattern": [
     "#R#",
@@ -27,7 +19,6 @@
     "#R#"
   ],
   "result": {
-    "count": 1,
     "id": "perfectmobfarmrevived:mushashite_mob_farm"
   }
 }

@@ -8,17 +8,30 @@ import nadiendev.perfectmobfarm.block.entity.MobFarmBlockEntity;
 import nadiendev.perfectmobfarm.item.DataComponentManager;
 import nadiendev.perfectmobfarm.item.MobShard;
 import nadiendev.perfectmobfarm.item.MobShardData;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
-public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity> {
+/**
+ * Draws the mobs captured by the shards above the Mob farm, spinning around Y.
+ * <p>
+ * A block entity renderer works in two steps: {@link #extractRenderState} copies what it needs from the block
+ * entity into a {@link MobFarmRenderState} and {@link #submit} draws that state.
+ */
+public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity, MobFarmRenderer.MobFarmRenderState> {
 
     // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -33,43 +46,66 @@ public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity> 
     /** Degrees per tick of the rotation around Y */
     private static final float SPIN_SPEED = 2.0F;
 
-    private final BlockEntityRendererProvider.Context context;
+    private final EntityRenderDispatcher entityRenderer;
 
     public MobFarmRenderer(BlockEntityRendererProvider.Context context) {
-        this.context = context;
+        this.entityRenderer = context.entityRenderer();
+    }
+
+    /**
+     * What the renderer needs to draw the farm: one render state of the captured mob per shard slot (null when the
+     * slot has nothing to draw) and the spin and placement shared by all of them
+     */
+    public static class MobFarmRenderState extends BlockEntityRenderState {
+        public final EntityRenderState[] mobs = new EntityRenderState[MobFarmBlockEntity.SHARD_SLOTS];
+        public int count;
+        public float time;
+        public float scale;
+        public float offsetX;
+        public float offsetZ;
     }
 
     @Override
-    public void render(MobFarmBlockEntity pBlockEntity, float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource, int pPackedLight, int pPackedOverlay) {
+    public MobFarmRenderState createRenderState() {
+        return new MobFarmRenderState();
+    }
+
+    @Override
+    public void extractRenderState(MobFarmBlockEntity pBlockEntity, MobFarmRenderState pState, float pPartialTick,
+                                   Vec3 pCameraPosition, ModelFeatureRenderer.@Nullable CrumblingOverlay pBreakProgress) {
+        BlockEntityRenderer.super.extractRenderState(pBlockEntity, pState, pPartialTick, pCameraPosition,
+                pBreakProgress);
+        pState.count = 0;
+        for (int i = 0; i < pState.mobs.length; i++) {
+            pState.mobs[i] = null;
+        }
         if (pBlockEntity.getLevel() == null) {
             return;
         }
 
         // One entry per shard slot: the type of the captured mob, null when the slot is unusable, empty or incomplete
         EntityType<?>[] types = new EntityType<?>[MobFarmBlockEntity.SHARD_SLOTS];
-        int count = 0;
         for (int i = 0; i < types.length; i++) {
             types[i] = getShardMobType(pBlockEntity, i);
             if (types[i] != null) {
-                count++;
+                pState.count++;
             }
         }
-        if (count == 0) {
+        if (pState.count == 0) {
             return;
         }
 
-        float time = pBlockEntity.getLevel().getGameTime() + pPartialTick;
+        pState.time = pBlockEntity.getLevel().getGameTime() + pPartialTick;
+        pState.scale = pState.count > 1 ? DOUBLE_SCALE : SINGLE_SCALE;
         // Right axis of the farm, seen from its front
         Direction right = pBlockEntity.getBlockState().getValue(MobFarmBlock.FACING).getCounterClockWise();
+        pState.offsetX = right.getStepX();
+        pState.offsetZ = right.getStepZ();
+
         for (int i = 0; i < types.length; i++) {
-            if (types[i] == null) {
-                continue;
+            if (types[i] != null) {
+                pState.mobs[i] = extractMob(types[i], i, pBlockEntity, pPartialTick, pState.lightCoords);
             }
-            // A lone mob stays centered; with two, the first one is on the right and the second one on the left
-            float offset = count > 1 ? (i == 0 ? DOUBLE_OFFSET : -DOUBLE_OFFSET) : 0.0F;
-            float scale = count > 1 ? DOUBLE_SCALE : SINGLE_SCALE;
-            renderGivenEntity(types[i], i, pBlockEntity, time, pPartialTick, pPoseStack, pBufferSource, pPackedLight,
-                    right.getStepX() * offset, right.getStepZ() * offset, scale);
         }
     }
 
@@ -94,47 +130,72 @@ public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity> 
     }
 
     /**
-     * Render the given entity type just above the Mob farm, slowly spinning around Y with a tiny vertical bob
+     * Get (or create) the entity the farm keeps for the slot and extract its render state
      *
-     * @param entityType    Type of the mob to draw
-     * @param pIndex        Shard slot the mob comes from (each slot keeps its own entity)
-     * @param pBlockEntity  Farm
-     * @param pTime         Game time in ticks plus the partial tick
-     * @param pPartialTick  Partial tick
-     * @param pPoseStack    Pose stack
-     * @param pBufferSource Buffer source
-     * @param pPackedLight  Light
-     * @param pOffsetX      Offset from the center of the block, on X
-     * @param pOffsetZ      Offset from the center of the block, on Z
-     * @param pScale        Scale of the mob
+     * @param entityType   Type of the mob to draw
+     * @param pIndex       Shard slot the mob comes from (each slot keeps its own entity)
+     * @param pBlockEntity Farm
+     * @param pPartialTick Partial tick
+     * @param pLight       Packed light of the farm
+     * @return The render state of the mob, or null if the entity could not be created
      */
-    public void renderGivenEntity(EntityType<?> entityType, int pIndex, MobFarmBlockEntity pBlockEntity, float pTime,
-                                  float pPartialTick, PoseStack pPoseStack, MultiBufferSource pBufferSource,
-                                  int pPackedLight, float pOffsetX, float pOffsetZ, float pScale) {
+    private EntityRenderState extractMob(EntityType<?> entityType, int pIndex, MobFarmBlockEntity pBlockEntity,
+                                         float pPartialTick, int pLight) {
         Entity entityToSpawn = pBlockEntity.getEntityToDisplay(pIndex);
         if (entityToSpawn == null || entityToSpawn.getType() != entityType) {
             LOGGER.debug("NEED TO CREATE A NEW ENTITY");
-            entityToSpawn = entityType.create(pBlockEntity.getLevel());
+            entityToSpawn = entityType.create(pBlockEntity.getLevel(), EntitySpawnReason.LOAD);
             pBlockEntity.setEntityToDisplay(pIndex, entityToSpawn);
         }
         if (entityToSpawn == null) {
-            return;
+            return null;
         }
-
-        pPoseStack.pushPose();
-        float rotation = pTime * SPIN_SPEED;
-        float bob = (float) Math.sin(pTime * 0.1F) * 0.02F;
 
         // Set head rotation to 0 to avoid head shaking
         entityToSpawn.setYHeadRot(0.0F);
 
+        EntityRenderState mobState = entityRenderer.extractEntity(entityToSpawn, pPartialTick);
+        mobState.lightCoords = pLight;
+        return mobState;
+    }
+
+    @Override
+    public void submit(MobFarmRenderState pState, PoseStack pPoseStack, SubmitNodeCollector pCollector,
+                       CameraRenderState pCamera) {
+        for (int i = 0; i < pState.mobs.length; i++) {
+            if (pState.mobs[i] == null) {
+                continue;
+            }
+            // A lone mob stays centered; with two, the first one is on the right and the second one on the left
+            float offset = pState.count > 1 ? (i == 0 ? DOUBLE_OFFSET : -DOUBLE_OFFSET) : 0.0F;
+            submitMob(pState.mobs[i], pState, pState.offsetX * offset, pState.offsetZ * offset, pPoseStack,
+                    pCollector, pCamera);
+        }
+    }
+
+    /**
+     * Draw one mob just above the Mob farm, slowly spinning around Y with a tiny vertical bob
+     *
+     * @param pMob       Render state of the mob
+     * @param pState     Render state of the farm
+     * @param pOffsetX   Offset from the center of the block, on X
+     * @param pOffsetZ   Offset from the center of the block, on Z
+     * @param pPoseStack Pose stack
+     * @param pCollector Submit node collector
+     * @param pCamera    Camera
+     */
+    private void submitMob(EntityRenderState pMob, MobFarmRenderState pState, float pOffsetX, float pOffsetZ,
+                           PoseStack pPoseStack, SubmitNodeCollector pCollector, CameraRenderState pCamera) {
+        pPoseStack.pushPose();
+        float rotation = pState.time * SPIN_SPEED;
+        float bob = (float) Math.sin(pState.time * 0.1F) * 0.02F;
+
         pPoseStack.translate(0.5F + pOffsetX, 0.25F + bob, 0.5F + pOffsetZ);
-        pPoseStack.scale(pScale, pScale, pScale);
+        pPoseStack.scale(pState.scale, pState.scale, pState.scale);
         // The spin replaces the facing of the block
         pPoseStack.mulPose(Axis.YP.rotationDegrees(rotation));
 
-        Minecraft.getInstance().getEntityRenderDispatcher().render(entityToSpawn, 0.0D, 0.0D, 0.0D, 0.0F,
-                pPartialTick, pPoseStack, pBufferSource, pPackedLight);
+        entityRenderer.submit(pMob, pCamera, 0.0D, 0.0D, 0.0D, pPoseStack, pCollector);
         pPoseStack.popPose();
     }
 }

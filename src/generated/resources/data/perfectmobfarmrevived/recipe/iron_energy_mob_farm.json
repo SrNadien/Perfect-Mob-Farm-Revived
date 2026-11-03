@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "P": {
-      "item": "perfectmobfarmrevived:iron_mob_farm"
-    },
-    "R": {
-      "item": "minecraft:redstone_block"
-    }
+    "P": "perfectmobfarmrevived:iron_mob_farm",
+    "R": "minecraft:redstone_block"
   },
   "pattern": [
     " R ",
@@ -15,7 +11,6 @@
     " R "
   ],
   "result": {
-    "count": 1,
     "id": "perfectmobfarmrevived:iron_energy_mob_farm"
   }
 }

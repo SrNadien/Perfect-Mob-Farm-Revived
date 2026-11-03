@@ -2,18 +2,10 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "#": {
-      "item": "minecraft:diamond_block"
-    },
-    "B": {
-      "item": "minecraft:ghast_tear"
-    },
-    "P": {
-      "item": "perfectmobfarmrevived:gold_mob_farm"
-    },
-    "R": {
-      "item": "minecraft:blaze_rod"
-    }
+    "#": "minecraft:diamond_block",
+    "B": "minecraft:ghast_tear",
+    "P": "perfectmobfarmrevived:gold_mob_farm",
+    "R": "minecraft:blaze_rod"
   },
   "pattern": [
     "#R#",
@@ -21,7 +13,6 @@
     "#R#"
   ],
   "result": {
-    "count": 1,
     "id": "perfectmobfarmrevived:diamond_mob_farm"
   }
 }

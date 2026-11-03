@@ -90,7 +90,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "main": "perfectmobfarmrevived:block/diamond_energy_mob_farm",
     "material": "minecraft:block/diamond_block",
