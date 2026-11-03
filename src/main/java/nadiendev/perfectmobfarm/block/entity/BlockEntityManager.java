@@ -18,7 +18,7 @@ public class BlockEntityManager {
             DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, PerfectMobFarm.MODID);
 
     /**
-     * One block entity type shared by every registered mob farm block (normal and energy, only the available tiers)
+     * One block entity type shared by every registered mob farm block (normal and energy)
      */
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MobFarmBlockEntity>> MOB_FARM = BLOCK_ENTITIES.register("mob_farm_entity",
             () -> new BlockEntityType<>(MobFarmBlockEntity::new,

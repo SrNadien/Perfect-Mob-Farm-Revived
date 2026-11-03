@@ -15,9 +15,6 @@ public class ServerConfigs {
     public static final ModConfigSpec.ConfigValue<Integer> NETHER_MOB_FARM_COOLDOWN;
     public static final ModConfigSpec.ConfigValue<Integer> END_MOB_FARM_COOLDOWN;
     public static final ModConfigSpec.ConfigValue<Integer> ULTIMATE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> MUSHASHITE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> JOANFOITE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> NADIENITE_MOB_FARM_COOLDOWN;
     public static final ModConfigSpec.ConfigValue<Integer> MOB_SHARD_KILL_NEEDED;
     public static final ModConfigSpec.ConfigValue<Integer> MOB_SHARD_DURABILITY;
     public static final ModConfigSpec.ConfigValue<Boolean> MOB_SHARD_UNBREAKABLE;
@@ -41,9 +38,6 @@ public class ServerConfigs {
         NETHER_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Nether Mob farm to generate loot (in ticks).").defineInRange("Nether Cooldown", 30, 1, Integer.MAX_VALUE);
         END_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by an End Mob farm to generate loot (in ticks).").defineInRange("End Cooldown", 20, 1, Integer.MAX_VALUE);
         ULTIMATE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by an Ultimate Mob farm to generate loot (in ticks).").defineInRange("Ultimate Cooldown", 10, 1, Integer.MAX_VALUE);
-        MUSHASHITE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Mushashite Mob farm to generate loot (in ticks). Only used when Ultimate Armoury is installed.").defineInRange("Mushashite Cooldown", 6, 1, Integer.MAX_VALUE);
-        JOANFOITE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Joanfoite Mob farm to generate loot (in ticks). Only used when Ultimate Armoury is installed.").defineInRange("Joanfoite Cooldown", 4, 1, Integer.MAX_VALUE);
-        NADIENITE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Nadienite Mob farm to generate loot (in ticks). Only used when Ultimate Armoury is installed.").defineInRange("Nadienite Cooldown", 1, 1, Integer.MAX_VALUE);
         MOB_SHARD_KILL_NEEDED = BUILDER.comment("Number of kills needed to complete a mob shard.").define("Kill Needed", 10);
         MOB_SHARD_DURABILITY = BUILDER.comment("Durability of a normal mob shard.").define("Normal mob shard durability", 256);
         MOB_SHARD_UNBREAKABLE = BUILDER.comment("If true, normal mob shards are never damaged by the mob farms.").define("Normal mob shard unbreakable", false);

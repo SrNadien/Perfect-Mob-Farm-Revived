@@ -12,7 +12,7 @@ base {
     archivesName = mod_named.replace(" ", "")
 }
 
-// Minecraft 26.1 runs on Java 25
+// Minecraft 26.2 runs on Java 25
 java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 // Genera tambien <nombre>-sources.jar junto al jar del mod
@@ -46,14 +46,11 @@ neoForge {
         clientData {
             clientData()
             programArguments.addAll dataArguments
-            // Makes FarmTier.isAvailable() true for the tiers that need other mods, so their blocks are registered and generated
-            systemProperty 'perfectmobfarmrevived.datagen', 'true'
         }
 
         serverData {
             serverData()
             programArguments.addAll dataArguments
-            systemProperty 'perfectmobfarmrevived.datagen', 'true'
         }
 
         // applies to all the run configs above
@@ -91,8 +88,6 @@ repositories {
             includeGroup 'mezz.jei'
             // Config library that JEI pulls in at runtime
             includeGroup 'net.mezzdev.config'
-            // Patchouli (required by Ultimate Armoury)
-            includeGroup 'vazkii.patchouli'
         }
     }
     exclusiveContent {
@@ -108,7 +103,7 @@ repositories {
         }
     }
     exclusiveContent {
-        // Ultimate Armoury (the mod of the integration tiers), published on CurseForge
+        // Nexus Network (energy source for testing the energy farms in runClient), published on CurseForge
         forRepository {
             maven {
                 name = 'Curse Maven'
@@ -120,7 +115,7 @@ repositories {
         }
     }
     exclusiveContent {
-        // GeckoLib (required by Ultimate Armoury)
+        // GeckoLib (required by Nexus Network)
         forRepository {
             maven {
                 name = 'GeckoLib'
@@ -144,16 +139,11 @@ dependencies {
     runtimeOnly "mezz.jei:jei-${mcversion}-neoforge:${jei_version}"
     runtimeOnly "maven.modrinth:jade:${jade_version}"
 
-    // Ultimate Armoury (provides the material blocks of the mushashite, joanfoite and nadienite tiers) and its
-    // required dependencies, so the three integration farms can be tested with runClient.
-    // 9327839 is the CurseForge file id of UltimateArmoury-26.1.2-2.0.13-NeoForge.
-    runtimeOnly "curse.maven:ultimate-armoury-tools-and-weapons-1736634:${ultimate_armoury_file_id}"
-    runtimeOnly "com.geckolib:geckolib-neoforge-${mcversion}:${geckolib_version}"
-    runtimeOnly "vazkii.patchouli:patchouli-neoforge:${patchouli_version}"
 
-    // Mekanism has no official 26.1.2 build. "Mekanism Version Locked" is an unofficial community port of it for
-    // 26.1.2 (CurseForge project 1713956), used here to power the energy mob farms in runClient.
-    runtimeOnly "curse.maven:mekanism-version-locked-1713956:${mekanism_version_locked_file_id}"
+    // Nexus Network (energy source, since Mekanism has no Minecraft 26.2 build) and its required dependency GeckoLib, so the
+    // energy mob farms can be powered in runClient. nexus_file_id is the CurseForge file id of nexus-neoforge-26.2-1.0.0-beta.2.
+    runtimeOnly "curse.maven:nexus-network-1732634:${nexus_file_id}"
+    runtimeOnly "com.geckolib:geckolib-neoforge-${mcversion}:${geckolib_version}"
 }
 
 test {

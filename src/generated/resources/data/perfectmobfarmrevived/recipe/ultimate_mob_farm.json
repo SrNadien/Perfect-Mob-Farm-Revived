@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "#": "minecraft:nether_star",
     "B": "minecraft:enchanted_golden_apple",

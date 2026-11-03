@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.ValueInput;
@@ -397,7 +398,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
         }
         LootTable lt = serverLevel.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, loc));
 
-        Optional<EntityType<?>> optEntityType = EntityType.byString(data.mobId());
+        Optional<EntityType<?>> optEntityType = BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.tryParse(data.mobId()));
         if (optEntityType.isEmpty()) {
             LOGGER.error("In generateDrop(): Unable to get entity type.");
             return false;

@@ -1,6 +1,5 @@
 {
   "type": "minecraft:crafting_shaped",
-  "category": "misc",
   "key": {
     "P": "perfectmobfarmrevived:nether_mob_farm",
     "R": "minecraft:redstone_block"

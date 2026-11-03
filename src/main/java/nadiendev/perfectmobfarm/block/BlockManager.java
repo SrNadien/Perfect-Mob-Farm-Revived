@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -18,8 +17,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * Manager for the mod blocks. A farm is only registered when its tier is available
- * (see {@link FarmTier#isAvailable()}). Every tier has two blocks: the normal one and the energy one.
+ * Manager for the mod blocks. Every tier has two blocks: the normal one and the energy one.
  */
 public class BlockManager {
 
@@ -27,13 +25,10 @@ public class BlockManager {
 
     private static final Map<FarmTier, DeferredBlock<Block>> FARMS_BY_TIER = new EnumMap<>(FarmTier.class);
     private static final Map<FarmTier, DeferredBlock<Block>> ENERGY_FARMS_BY_TIER = new EnumMap<>(FarmTier.class);
-    private static final List<DeferredBlock<Block>> AVAILABLE_FARMS = new ArrayList<>();
+    private static final List<DeferredBlock<Block>> ALL_FARMS = new ArrayList<>();
 
     static {
         for (FarmTier tier : FarmTier.values()) {
-            if (!tier.isAvailable()) {
-                continue;
-            }
             DeferredBlock<Block> farm = registerBlock(tier.getName() + "_mob_farm",
                     properties -> new MobFarmBlock(tier, false, properties), tier);
             DeferredBlock<Block> energyFarm = BLOCKS.registerBlock(tier.getName() + "_energy_mob_farm",
@@ -43,31 +38,29 @@ public class BlockManager {
                     properties -> new EnergyMobFarmBlockItem(tier, energyFarm.get(), properties.useBlockDescriptionPrefix()));
             FARMS_BY_TIER.put(tier, farm);
             ENERGY_FARMS_BY_TIER.put(tier, energyFarm);
-            AVAILABLE_FARMS.add(farm);
-            AVAILABLE_FARMS.add(energyFarm);
+            ALL_FARMS.add(farm);
+            ALL_FARMS.add(energyFarm);
         }
     }
 
     /**
-     * All the registered mob farms (only the available tiers), in tier order: for each tier the normal farm
+     * All the registered mob farms, in tier order: for each tier the normal farm
      * followed by the energy farm
      */
-    public static final List<DeferredBlock<Block>> MOB_FARMS = List.copyOf(AVAILABLE_FARMS);
+    public static final List<DeferredBlock<Block>> MOB_FARMS = List.copyOf(ALL_FARMS);
 
     /**
      * @param tier Tier of the farm
-     * @return The normal farm block (no energy) of this tier, or null if the tier is not available
+     * @return The normal farm block (no energy) of this tier
      */
-    @Nullable
     public static DeferredBlock<Block> getBlock(FarmTier tier) {
         return FARMS_BY_TIER.get(tier);
     }
 
     /**
      * @param tier Tier of the farm
-     * @return The energy farm block of this tier, or null if the tier is not available
+     * @return The energy farm block of this tier
      */
-    @Nullable
     public static DeferredBlock<Block> getEnergyBlock(FarmTier tier) {
         return ENERGY_FARMS_BY_TIER.get(tier);
     }

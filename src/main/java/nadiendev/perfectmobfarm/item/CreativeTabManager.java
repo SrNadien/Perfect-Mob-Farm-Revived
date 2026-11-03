@@ -41,7 +41,7 @@ public class CreativeTabManager {
                         output.accept(ItemManager.ULTIMATE_MOB_SHARD.get());
                         output.accept(ItemManager.SPEED_UPGRADE.get());
                         output.accept(ItemManager.MOB_SLOT_UPGRADE.get());
-                        // Only the available tiers are registered, in tier order: normal farm, then energy farm
+                        // In tier order: normal farm, then energy farm
                         // empty, then energy farm filled with energy
                         BlockManager.MOB_FARMS.forEach(farm -> {
                             Block block = farm.get();

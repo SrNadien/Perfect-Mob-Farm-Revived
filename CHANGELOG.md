@@ -1,11 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## 3.0.0 - 2026-11-02
+## 4.0.0 - 2026-11-02
 
 ### Added
 - Nether, End and Ultimate mob farms
-- Mushashite, Joanfoite and Nadienite mob farms, only available when Ultimate Armoury: Tools And Weapons is loaded
 - Energy version of every mob farm: it needs Forge Energy to work and the creative tab has them filled with energy
 - Redstone control: a lever placed on a mob farm stops it when it is OFF and starts it when it is ON
 - Progress bar in the mob farm menu
@@ -19,7 +18,7 @@ All notable changes to this project will be documented in this file.
 - Data generation for models, blockstates, language files, recipes, loot tables and tags
 
 ### Changed
-- This is the Minecraft 26.1.2 version of the mod (NeoForge 26.1.2.126, Java 25)
+- This is the Minecraft 26.2 version of the mod (NeoForge 26.2.0.93)
 - The mod id is now `perfectmobfarmrevived` (it was `perfectmobfarm`), so blocks and items of old worlds are not kept
 - Mob shards now store their linked mob and kill count in a data component instead of NBT
 - The five mob farms now share a single parametrized block and block entity
@@ -27,7 +26,7 @@ All notable changes to this project will be documented in this file.
 - The mod now uses the NeoForge configuration system (server config)
 
 ### Fixed
-- Resources and data packs updated to the 26.1 format (recipes, loot tables and tags)
+- Resources and data packs updated to the 26.2 format (recipes, loot tables and tags)
 
 ## 1.2.0 - 07.07.2022
 

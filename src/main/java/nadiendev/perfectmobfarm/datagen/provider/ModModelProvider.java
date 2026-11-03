@@ -25,7 +25,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.model.generators.template.ExtendedModelTemplateBuilder;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -35,9 +34,6 @@ import java.util.stream.Stream;
  * (one model while incomplete and another one once completed) and the farm upgrades.
  */
 public class ModModelProvider extends ModelProvider {
-
-    /** Namespace of the optional mod whose blocks are the material of the integration tiers */
-    private static final String ULTIMATE_ARMOURY = "ultimatearmoury";
 
     /** Texture slots of the farm model */
     private static final TextureSlot MATERIAL = TextureSlot.create("material");
@@ -92,14 +88,10 @@ public class ModModelProvider extends ModelProvider {
     }
 
     /**
-     * Writes the blockstate of a farm: the model rotated to face the block direction. Does nothing for a null block
-     * (tier that is not available).
+     * Writes the blockstate of a farm: the model rotated to face the block direction.
      */
-    private static void farmState(BlockModelGenerators blockModels, @Nullable Block block, FarmTier tier,
+    private static void farmState(BlockModelGenerators blockModels, Block block, FarmTier tier,
                                   boolean energy) {
-        if (block == null) {
-            return;
-        }
         MultiVariant variant = BlockModelGenerators.plainVariant(farmModel(blockModels, block, tier, energy));
         // Only the horizontal directions rotate the model; up and down reuse the unrotated one
         blockModels.blockStateOutput.accept(MultiVariantGenerator.dispatch(block, variant)
@@ -148,8 +140,6 @@ public class ModModelProvider extends ModelProvider {
             case NETHER -> Identifier.withDefaultNamespace("block/nether_bricks");
             case END -> Identifier.withDefaultNamespace("block/end_stone_bricks");
             case ULTIMATE -> Identifier.withDefaultNamespace("block/obsidian");
-            case MUSHASHITE, JOANFOITE, NADIENITE ->
-                    Identifier.fromNamespaceAndPath(ULTIMATE_ARMOURY, "block/" + tier.getName() + "_block");
         };
     }
 
@@ -158,15 +148,13 @@ public class ModModelProvider extends ModelProvider {
         return BlockManager.MOB_FARMS.stream();
     }
 
-    @Nullable
     private static Block getBlock(FarmTier tier) {
         var farm = BlockManager.getBlock(tier);
-        return farm == null ? null : farm.get();
+        return farm.get();
     }
 
-    @Nullable
     private static Block getEnergyBlock(FarmTier tier) {
         var farm = BlockManager.getEnergyBlock(tier);
-        return farm == null ? null : farm.get();
+        return farm.get();
     }
 }

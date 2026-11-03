@@ -1,4 +1,4 @@
-# Mod metadata for NeoForge 26.1.2. The placeholders are filled by the processResources task of build.gradle.
+# Mod metadata for NeoForge 26.2. The placeholders are filled by the processResources task of build.gradle.
 modLoader="javafml"
 loaderVersion="${loader_version}"
 license="${license}"
@@ -8,7 +8,8 @@ license="${license}"
 modId="${modid}"
 version="${mod_version}"
 displayName="${mod_named}"
-logoFile="mobfarm-banner.png"
+bannerFile="mobfarm-banner.png"
+iconFile="logo.png"
 authors="${author}, Sweetmimike"
 credits="Original mod Perfect Mob Farm by Sweetmimike"
 description='''${mod_description}'''
@@ -16,14 +17,14 @@ description='''${mod_description}'''
 [[dependencies.${modid}]]
 modId="neoforge"
 type="required"
-versionRange="[26.1.2.100,)"
+versionRange="[26.2.0.93,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${modid}]]
 modId="minecraft"
 type="required"
-versionRange="[26.1.2]"
+versionRange="[26.2]"
 ordering="NONE"
 side="BOTH"
 
@@ -31,13 +32,13 @@ side="BOTH"
 [[dependencies.${modid}]]
 modId="jei"
 type="optional"
-versionRange="[29,)"
+versionRange="[30,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${modid}]]
 modId="jade"
 type="optional"
-versionRange="[26,)"
+versionRange="[26.2,)"
 ordering="NONE"
 side="BOTH"

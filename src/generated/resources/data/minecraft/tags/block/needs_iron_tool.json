@@ -15,30 +15,6 @@
     "perfectmobfarmrevived:end_mob_farm",
     "perfectmobfarmrevived:end_energy_mob_farm",
     "perfectmobfarmrevived:ultimate_mob_farm",
-    "perfectmobfarmrevived:ultimate_energy_mob_farm",
-    {
-      "id": "perfectmobfarmrevived:mushashite_mob_farm",
-      "required": false
-    },
-    {
-      "id": "perfectmobfarmrevived:mushashite_energy_mob_farm",
-      "required": false
-    },
-    {
-      "id": "perfectmobfarmrevived:joanfoite_mob_farm",
-      "required": false
-    },
-    {
-      "id": "perfectmobfarmrevived:joanfoite_energy_mob_farm",
-      "required": false
-    },
-    {
-      "id": "perfectmobfarmrevived:nadienite_mob_farm",
-      "required": false
-    },
-    {
-      "id": "perfectmobfarmrevived:nadienite_energy_mob_farm",
-      "required": false
-    }
+    "perfectmobfarmrevived:ultimate_energy_mob_farm"
   ]
 }

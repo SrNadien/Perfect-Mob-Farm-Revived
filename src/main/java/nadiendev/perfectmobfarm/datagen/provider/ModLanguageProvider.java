@@ -79,9 +79,6 @@ public class ModLanguageProvider extends LanguageProvider {
     private void addBlocks() {
         for (FarmTier tier : FarmTier.values()) {
             var farm = BlockManager.getBlock(tier);
-            if (farm == null) {
-                continue;
-            }
             addBlock(farm, tr(capitalize(tier.getName()) + " Mob Farm", "Granja de mobs " + spanishTier(tier)));
             addBlock(BlockManager.getEnergyBlock(tier), tr(capitalize(tier.getName()) + " Energy Mob Farm",
                     "Granja de mobs " + spanishTier(tier) + " con energía"));
@@ -171,8 +168,6 @@ public class ModLanguageProvider extends LanguageProvider {
             case NETHER -> "del Nether";
             case END -> "del End";
             case ULTIMATE -> "definitiva";
-            // Names of the materials of the other mod, they are not translated
-            case MUSHASHITE, JOANFOITE, NADIENITE -> "de " + capitalize(tier.getName());
         };
     }
 }

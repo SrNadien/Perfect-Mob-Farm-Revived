@@ -38,24 +38,21 @@ public class ModBlockLootProvider extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        for (Block farm : getUnconditionalFarms()) {
+        for (Block farm : getFarms()) {
             dropSelf(farm);
         }
     }
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return getUnconditionalFarms();
+        return getFarms();
     }
 
     /**
-     * Farms of tiers that need another mod have their loot table written by {@link ModConditionalBlockLootProvider}
-     *
-     * @return The farm blocks that always exist
+     * @return Every farm block: normal and energy variant of every tier
      */
-    private static List<Block> getUnconditionalFarms() {
+    private static List<Block> getFarms() {
         return Arrays.stream(FarmTier.values())
-                .filter(tier -> tier.getRequiredMod() == null)
                 .flatMap(tier -> Stream.of(BlockManager.getBlock(tier), BlockManager.getEnergyBlock(tier)))
                 .<Block>map(DeferredBlock::get)
                 .toList();

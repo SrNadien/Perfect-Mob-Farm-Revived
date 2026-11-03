@@ -13,19 +13,14 @@ import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.resources.Identifier;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Generates the recipes of the mod: the three mob shards, the two farm upgrades, every mob farm and every energy farm. Each farm is
- * crafted from the farm of the previous tier, and each energy farm from the normal farm of its tier. The tiers that need another mod are wrapped in a
- * {@link ModLoadedCondition}.
+ * crafted from the farm of the previous tier, and each energy farm from the normal farm of its tier.
  */
 public class ModRecipeProvider extends RecipeProvider {
 
@@ -145,11 +140,6 @@ public class ModRecipeProvider extends RecipeProvider {
         farm(recipeOutput, FarmTier.ULTIMATE, farmItem(FarmTier.END),
                 Items.NETHER_STAR, Items.DRAGON_HEAD, Items.ENCHANTED_GOLDEN_APPLE);
 
-        // Tiers of the integration mod: blocks and ingots come from the common tags
-        modFarm(recipeOutput, FarmTier.MUSHASHITE, FarmTier.ULTIMATE);
-        modFarm(recipeOutput, FarmTier.JOANFOITE, FarmTier.MUSHASHITE);
-        modFarm(recipeOutput, FarmTier.NADIENITE, FarmTier.JOANFOITE);
-
         for (FarmTier tier : FarmTier.values()) {
             energyFarm(recipeOutput, tier);
         }
@@ -157,12 +147,9 @@ public class ModRecipeProvider extends RecipeProvider {
 
     /**
      * Energy farm: the normal farm of the same tier surrounded by four redstone blocks in a cross, {@code  R /RPR/ R }.
-     * There is no recipe to go back. The tiers that need another mod are wrapped in a {@link ModLoadedCondition}.
+     * There is no recipe to go back.
      */
     private void energyFarm(RecipeOutput recipeOutput, FarmTier tier) {
-        RecipeOutput output = tier.getRequiredMod() == null
-                ? recipeOutput
-                : recipeOutput.withConditions(new ModLoadedCondition(tier.getRequiredMod()));
         ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, BlockManager.getEnergyBlock(tier).get())
                 .pattern(" R ")
                 .pattern("RPR")
@@ -170,7 +157,7 @@ public class ModRecipeProvider extends RecipeProvider {
                 .define('R', Items.REDSTONE_BLOCK)
                 .define('P', farmItem(tier))
                 .unlockedBy("has_farm", has(farmItem(tier)))
-                .save(output, recipeId(tier.getName() + "_energy_mob_farm"));
+                .save(recipeOutput, recipeId(tier.getName() + "_energy_mob_farm"));
     }
 
     /**
@@ -190,24 +177,6 @@ public class ModRecipeProvider extends RecipeProvider {
                 .save(recipeOutput, farmId(tier));
     }
 
-    /**
-     * Farm of a tier that needs another mod: only loaded when that mod is present.
-     */
-    private void modFarm(RecipeOutput recipeOutput, FarmTier tier, FarmTier previous) {
-        TagKey<Item> storageBlocks = commonTag("storage_blocks/" + tier.getName());
-        TagKey<Item> ingots = commonTag("ingots/" + tier.getName());
-        ShapedRecipeBuilder.shaped(this.items, RecipeCategory.MISC, farmItem(tier))
-                .pattern("#R#")
-                .pattern("BPB")
-                .pattern("#R#")
-                .define('#', storageBlocks)
-                .define('R', ingots)
-                .define('B', Items.NETHER_STAR)
-                .define('P', farmItem(previous))
-                .unlockedBy("has_previous_farm", has(farmItem(previous)))
-                .save(recipeOutput.withConditions(new ModLoadedCondition(tier.getRequiredMod())), farmId(tier));
-    }
-
     private static ItemLike farmItem(FarmTier tier) {
         return BlockManager.getBlock(tier).get();
     }
@@ -220,7 +189,4 @@ public class ModRecipeProvider extends RecipeProvider {
         return ResourceKey.create(Registries.RECIPE, PerfectMobFarm.id(path));
     }
 
-    private static TagKey<Item> commonTag(String path) {
-        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", path));
-    }
 }

@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - "Neo/26.1.2"
+      - "Neo/26.2"
     paths:
       - "src/**"
       - "*.gradle"
@@ -34,7 +34,7 @@ jobs:
         run: |
           VERSION=$(grep -m1 '^mod_version=' gradle.properties | cut -d= -f2 | tr -d " ")
           echo "mod_version=$VERSION" >> $GITHUB_OUTPUT
-          echo "release_version=${VERSION}+26.1.2-build.${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "release_version=${VERSION}+26.2-build.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -42,7 +42,7 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      # Builds the NeoForge jar for Minecraft 26.1.2
+      # Builds the NeoForge jar for Minecraft 26.2
       - name: Build
         run: ./gradlew build
 
@@ -82,7 +82,7 @@ jobs:
           set -euo pipefail
           : "${CURSEFORGE_TOKEN:?Add the CURSEFORGE_TOKEN secret to the repository}"
           : "${CURSEFORGE_PROJECT_ID:?Add the CURSEFORGE_PROJECT_ID variable to the repository}"
-          MC="26.1.2"
+          MC="26.2"
 
           RELEASE_TYPE=release
           if [[ "$COMMIT_MESSAGE" =~ \[curseforge\ (alpha|beta|release)\] ]]; then RELEASE_TYPE="${BASH_REMATCH[1]}"; fi

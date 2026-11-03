@@ -17,6 +17,8 @@ import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -126,7 +128,7 @@ public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity, 
         if (data == null || !MobShard.isComplete(itemHeld)) {
             return null;
         }
-        return EntityType.byString(data.mobId()).orElse(null);
+        return BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.tryParse(data.mobId())).orElse(null);
     }
 
     /**
@@ -145,6 +147,11 @@ public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity, 
         if (entityToSpawn == null || entityToSpawn.getType() != entityType) {
             LOGGER.debug("NEED TO CREATE A NEW ENTITY");
             entityToSpawn = entityType.create(pBlockEntity.getLevel(), EntitySpawnReason.LOAD);
+            if (entityToSpawn != null) {
+                // Since 26.2 an entity has no id until the level assigns one, and the renderers read it. This mob is
+                // never added to the level, so give it a negative id that no real entity can have.
+                entityToSpawn.setId(-1 - pIndex);
+            }
             pBlockEntity.setEntityToDisplay(pIndex, entityToSpawn);
         }
         if (entityToSpawn == null) {
