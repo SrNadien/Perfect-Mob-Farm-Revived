@@ -10,6 +10,7 @@ on:
       - "gradle.properties"
       - "CHANGELOG.md"
       - ".github/workflows/build.yml"
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
