@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:end_crystal"
+    },
+    "B": {
+      "item": "minecraft:shulker_shell"
+    },
+    "P": {
+      "item": "perfectmobfarmrevived:nether_mob_farm"
+    },
+    "R": {
+      "item": "minecraft:dragon_breath"
+    }
+  },
+  "pattern": [
+    "#R#",
+    "BPB",
+    "#R#"
+  ],
+  "result": {
+    "item": "perfectmobfarmrevived:end_mob_farm"
+  },
+  "show_notification": true
+}

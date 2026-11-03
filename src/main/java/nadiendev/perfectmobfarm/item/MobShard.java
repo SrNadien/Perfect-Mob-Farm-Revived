@@ -6,6 +6,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class MobShard extends Item {
      * @return True if the stack is a linked mob shard that registered enough kills to be used in a mob farm
      */
     public static boolean isComplete(ItemStack stack) {
-        MobShardData data = stack.get(DataComponentManager.MOB_SHARD_DATA.get());
+        MobShardData data = MobShardData.get(stack);
         return data != null && stack.getItem() instanceof MobShard && data.killedCount() >= getKillsNeeded(stack);
     }
 
@@ -61,8 +63,8 @@ public class MobShard extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack pStack, TooltipContext pContext, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
-        MobShardData data = pStack.get(DataComponentManager.MOB_SHARD_DATA.get());
+    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pTooltipFlag) {
+        MobShardData data = MobShardData.get(pStack);
         if (data != null) {
             pTooltipComponents.add(Component.literal(data.mobName()).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             // A shard that needs no kills is complete as soon as it is linked
@@ -74,7 +76,7 @@ public class MobShard extends Item {
         if (isUnbreakableShard()) {
             pTooltipComponents.add(Component.translatable("item.unbreakable").withStyle(ChatFormatting.BLUE));
         }
-        super.appendHoverText(pStack, pContext, pTooltipComponents, pTooltipFlag);
+        super.appendHoverText(pStack, pLevel, pTooltipComponents, pTooltipFlag);
     }
 
     /**

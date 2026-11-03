@@ -1,12 +1,11 @@
 package nadiendev.perfectmobfarm.block;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import nadiendev.perfectmobfarm.block.entity.BlockEntityManager;
 import nadiendev.perfectmobfarm.block.entity.MobFarmBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -24,23 +23,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Locale;
 
 /**
  * Mob Farm block. One class for every tier and for both variants (normal and energy), see {@link FarmTier}.
  */
 public class MobFarmBlock extends BaseEntityBlock {
-
-    private static final Codec<FarmTier> TIER_CODEC = Codec.STRING.xmap(
-            name -> FarmTier.valueOf(name.toUpperCase(Locale.ROOT)), FarmTier::getName);
-
-    public static final MapCodec<MobFarmBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            TIER_CODEC.fieldOf("tier").forGetter(MobFarmBlock::getTier),
-            Codec.BOOL.fieldOf("uses_energy").forGetter(MobFarmBlock::usesEnergy),
-            propertiesCodec()
-    ).apply(instance, MobFarmBlock::new));
 
     public static final DirectionProperty FACING = DirectionalBlock.FACING;
 
@@ -70,11 +59,6 @@ public class MobFarmBlock extends BaseEntityBlock {
         return usesEnergy;
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
-
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
@@ -82,11 +66,11 @@ public class MobFarmBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, BlockHitResult pHitResult) {
+    public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult) {
         if (!pLevel.isClientSide()) {
             BlockEntity entity = pLevel.getBlockEntity(pPos);
             if (entity instanceof MobFarmBlockEntity farmEntity) {
-                pPlayer.openMenu(farmEntity, pPos);
+                NetworkHooks.openScreen((ServerPlayer) pPlayer, farmEntity, pPos);
             } else {
                 throw new IllegalStateException("Our Container provider is missing!");
             }
@@ -103,13 +87,13 @@ public class MobFarmBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+    public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
         super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
         refreshRedstone(pLevel, pPos);
     }
 
     @Override
-    protected void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock, BlockPos pNeighborPos, boolean pMovedByPiston) {
+    public void neighborChanged(BlockState pState, Level pLevel, BlockPos pPos, Block pNeighborBlock, BlockPos pNeighborPos, boolean pMovedByPiston) {
         super.neighborChanged(pState, pLevel, pPos, pNeighborBlock, pNeighborPos, pMovedByPiston);
         refreshRedstone(pLevel, pPos);
     }
@@ -125,7 +109,7 @@ public class MobFarmBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
 
         if (!pState.is(pNewState.getBlock())) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
@@ -138,7 +122,7 @@ public class MobFarmBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState pState) {
+    public RenderShape getRenderShape(BlockState pState) {
         return RenderShape.MODEL;
     }
 
@@ -148,12 +132,12 @@ public class MobFarmBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState rotate(BlockState pState, Rotation pRotation) {
+    public BlockState rotate(BlockState pState, Rotation pRotation) {
         return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
     @Override
-    protected BlockState mirror(BlockState pState, Mirror pMirror) {
+    public BlockState mirror(BlockState pState, Mirror pMirror) {
         return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 

@@ -1,11 +1,10 @@
 package nadiendev.perfectmobfarm.item;
 
 import nadiendev.perfectmobfarm.block.FarmTier;
-import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.component.CustomData;
 
 /**
  * Block item of the energy mob farms. It shows the stored energy as a green bar under the item, like a charged
@@ -29,8 +28,8 @@ public class EnergyMobFarmBlockItem extends BlockItem {
      * @return The energy stored in the block entity data of the stack, 0 if it carries none
      */
     private static int getStoredEnergy(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data == null ? 0 : Math.max(0, data.copyTag().getInt("energy"));
+        CompoundTag data = BlockItem.getBlockEntityData(stack);
+        return data == null ? 0 : Math.max(0, data.getInt("energy"));
     }
 
     @Override

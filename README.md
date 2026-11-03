@@ -1,9 +1,9 @@
 # Perfect Mob Farm Revived
-Perfect Mob Farm Revived is a port of **Perfect Mob Farm**, the original mod by **Sweetmimike**, to **Minecraft 1.21.1** and **NeoForge 21.1.262**.
+Perfect Mob Farm Revived is a port of **Perfect Mob Farm**, the original mod by **Sweetmimike**, to **Minecraft 1.20.1** and **Forge 47.4.28**.
 
 ## Presentation
 
-Perfect Mob Farm Revived is a simple mod for Minecraft **1.21.1** (NeoForge) that adds new blocks called Mob Farms. These new blocks allow the player to generate loot passively after having correctly setup the mob farms.
+Perfect Mob Farm Revived is a simple mod for Minecraft **1.20.1** (Forge) that adds new blocks called Mob Farms. These new blocks allow the player to generate loot passively after having correctly setup the mob farms.
 
 To setup a mob farm, first you have to craft a **Mob Shard** and link it to a mob type by right clicking on the mob you want to generate loot. Then, when your mob shard is linked to a mob, you have to fill it by killing mob of the same type. Finally, just put the shard in the mob farm, put a container (chest, hopper...) right below it and enjoy ! Your mob farm will start **generating** loot.
 
@@ -54,15 +54,6 @@ Place a lever on a mob farm: while the lever is **OFF** the farm is stopped, whi
 - `config/perfectmobfarmrevived/blacklist.json` (Ender Dragon, Wither and Elder Guardian by default) and `whitelist.json` (empty by default, an empty whitelist allows every mob) can be edited to choose which mobs can be captured.
 - The entity type tags `perfectmobfarmrevived:blacklist` and `perfectmobfarmrevived:whitelist` do the same from a datapack. They are only used when they contain something.
 
-### Integration with Ultimate Armoury: Tools And Weapons
-When [Ultimate Armoury: Tools And Weapons](https://www.curseforge.com/minecraft/mc-mods/ultimate-armoury-tools-and-weapons) is loaded, three more tiers are available (normal and energy versions). They only exist in the **1.21.1** and **26.1.2** versions of this mod, the only ones Ultimate Armoury is released for:
-
-| Mob farm | Generates loot every | Looting |
-|---|---|---|
-| **Mushashite** | 0.3 seconds | 7 |
-| **Joanfoite** | 0.2 seconds | 8 |
-| **Nadienite** | 0.05 seconds | 10 |
-
 ### Mod integrations
 - **JEI**: description pages for the shards and every farm.
 - **Jade**: shows the captured mob, the kills, the state of the farm, a progress bar and the energy.
@@ -77,18 +68,18 @@ When [Ultimate Armoury: Tools And Weapons](https://www.curseforge.com/minecraft/
 - [X] ~~Mob blacklist and whitelist~~
 - [X] ~~Energy (energy versions of every farm)~~
 - [X] ~~Redstone control with a lever~~
-- [X] ~~Ultimate Armoury: Tools And Weapons integration~~
 - [X] ~~JEI integration~~
 - [X] ~~Jade integration~~
 - [X] ~~Data generation (models, blockstates, lang, recipes, loot tables and tags)~~
 - [X] ~~Farm upgrade (Speed, additional mob slot, ...)~~
 - [X] ~~Mob farm visual improvement~~
+- [ ] Tell me 😉
 
 ## Usage
 This project is under the MIT License.
 
 ## Credits
-Perfect Mob Farm was created by **Sweetmimike**. This port to 1.21.1 NeoForge is maintained by **SrNadien**.
+Perfect Mob Farm was created by **Sweetmimike**. This port to 1.20.1 Forge is maintained by **SrNadien**.
 
 Perfect Mob farm is inspired by [Tiny Mob farm](https://www.curseforge.com/minecraft/mc-mods/tiny-mob-farm).
 

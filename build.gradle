@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.143'
+    id 'net.neoforged.moddev.legacyforge' version '2.0.148'
 }
 
 version = "${mcversion}-${mod_version}-${tag_lanzador}"
@@ -12,18 +12,23 @@ base {
     archivesName = mod_named.replace(" ", "")
 }
 
-// Mojang ships Java 21 to end users in 1.20.5+, so your mod should target Java 21.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Minecraft 1.20.1 runs on Java 17
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 // Genera tambien <nombre>-sources.jar junto al jar del mod
 java {
     withSourcesJar()
 }
 
-//neoForge.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+//legacyForge.accessTransformers.from rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
 
-neoForge {
-    version = "${neoversion}"
+legacyForge {
+    version = "${mcversion}-${forgeversion}"
+
+    parchment {
+        minecraftVersion = parchment_minecraft_version
+        mappingsVersion = parchment_mappings_version
+    }
 
     runs {
         client {
@@ -44,9 +49,6 @@ neoForge {
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
             programArguments.addAll '--mod', "${modid}", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-
-            // Makes FarmTier.isAvailable() true for the tiers that need other mods, so their blocks are registered and generated
-            systemProperty 'perfectmobfarmrevived.datagen', 'true'
         }
 
         // applies to all the run configs above
@@ -81,10 +83,6 @@ repositories {
         url = 'https://maven.blamejared.com/'
         content {
             includeGroup 'mezz.jei'
-            // Config library that JEI pulls in at runtime
-            includeGroup 'net.mezzdev.config'
-            // Patchouli (required by Ultimate Armoury)
-            includeGroup 'vazkii.patchouli'
         }
     }
     exclusiveContent {
@@ -99,18 +97,6 @@ repositories {
             includeGroup 'maven.modrinth'
         }
     }
-    exclusiveContent {
-        // Ultimate Armoury (the mod of the integration tiers), published on CurseForge
-        forRepository {
-            maven {
-                name = 'Curse Maven'
-                url = 'https://cursemaven.com'
-            }
-        }
-        filter {
-            includeGroup 'curse.maven'
-        }
-    }
     maven {
         // Mekanism, only used in the dev environment to power the energy mob farms
         name = 'ModMaven'
@@ -119,41 +105,22 @@ repositories {
             includeGroup 'mekanism'
         }
     }
-    exclusiveContent {
-        // GeckoLib (required by Ultimate Armoury)
-        forRepository {
-            maven {
-                name = 'GeckoLib'
-                url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-            }
-        }
-        filter {
-            includeGroup 'software.bernie.geckolib'
-        }
-    }
 }
 
 dependencies {
     // Optional integrations: compiled against, never required at runtime.
     // Only the classes inside nadiendev.perfectmobfarm.compat may reference them.
-    compileOnly "mezz.jei:jei-${mcversion}-common-api:${jei_version}"
-    compileOnly "mezz.jei:jei-${mcversion}-neoforge-api:${jei_version}"
-    compileOnly "maven.modrinth:jade:${jade_version}"
+    modCompileOnly "mezz.jei:jei-${mcversion}-common-api:${jei_version}"
+    modCompileOnly "mezz.jei:jei-${mcversion}-forge-api:${jei_version}"
+    modCompileOnly "maven.modrinth:jade:${jade_version}"
 
     // Present in the dev environment so the integrations can be tested with runClient
-    runtimeOnly "mezz.jei:jei-${mcversion}-neoforge:${jei_version}"
-    runtimeOnly "maven.modrinth:jade:${jade_version}"
-
-    // Ultimate Armoury (provides the material blocks of the mushashite, joanfoite and nadienite tiers) and its
-    // required dependencies, so the three integration farms can be tested with runClient.
-    // 9327829 is the CurseForge file id of UltimateArmoury-1.21.1-2.0.13-NeoForge.
-    runtimeOnly "curse.maven:ultimate-armoury-tools-and-weapons-1736634:9327829"
-    runtimeOnly "software.bernie.geckolib:geckolib-neoforge-${mcversion}:4.9.3"
-    runtimeOnly "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE"
+    modRuntimeOnly "mezz.jei:jei-${mcversion}-forge:${jei_version}"
+    modRuntimeOnly "maven.modrinth:jade:${jade_version}"
 
     // Mekanism (creative energy cubes, cables, generators) to power the energy mob farms in runClient
-    runtimeOnly "mekanism:Mekanism:${mekanism_version}"
-    runtimeOnly "mekanism:Mekanism:${mekanism_version}:generators"
+    modRuntimeOnly "mekanism:Mekanism:${mekanism_version}"
+    modRuntimeOnly "mekanism:Mekanism:${mekanism_version}:generators"
 }
 
 test {
@@ -184,12 +151,12 @@ tasks.withType(ProcessResources).configureEach {
             tag_lanzador           : tag_lanzador,
             mod_description        : mod_description,
             license                : license,
-            neoversion             : neoversion,
+            forgeversion           : forgeversion,
             loader_version         : loader_version,
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/neoforge.mods.toml']) {
+    filesMatching(['META-INF/mods.toml']) {
         expand replaceProperties
     }
 }
@@ -217,5 +184,5 @@ idea {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-    options.getRelease().set(21)
+    options.getRelease().set(17)
 }

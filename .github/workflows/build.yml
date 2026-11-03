@@ -3,7 +3,7 @@ name: Build and Release
 on:
   push:
     branches:
-      - "main"
+      - "Forge/1.20.1"
     paths:
       - "src/**"
       - "*.gradle"
@@ -23,13 +23,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Gradle itself runs on JDK 25, the Java 21 toolchain of the project is provisioned from this too
-      - name: Set up JDKs
+      # Minecraft 1.20.1 and Gradle both run on JDK 17
+      - name: Set up JDK 17
         uses: actions/setup-java@v6
         with:
-          java-version: |
-            21
-            25
+          java-version: "17"
           distribution: "temurin"
 
       - name: Read Version
@@ -37,7 +35,7 @@ jobs:
         run: |
           VERSION=$(grep -m1 '^mod_version=' gradle.properties | cut -d= -f2 | tr -d " ")
           echo "mod_version=$VERSION" >> $GITHUB_OUTPUT
-          echo "release_version=${VERSION}+1.21.1-build.${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "release_version=${VERSION}+1.20.1-build.${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
@@ -45,7 +43,7 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      # Builds the NeoForge jar for Minecraft 1.21.1
+      # Builds the Forge jar for Minecraft 1.20.1
       - name: Build
         run: ./gradlew build
 
@@ -85,7 +83,7 @@ jobs:
           set -euo pipefail
           : "${CURSEFORGE_TOKEN:?Add the CURSEFORGE_TOKEN secret to the repository}"
           : "${CURSEFORGE_PROJECT_ID:?Add the CURSEFORGE_PROJECT_ID variable to the repository}"
-          MC="1.21.1"
+          MC="1.20.1"
 
           RELEASE_TYPE=release
           if [[ "$COMMIT_MESSAGE" =~ \[curseforge\ (alpha|beta|release)\] ]]; then RELEASE_TYPE="${BASH_REMATCH[1]}"; fi
@@ -95,9 +93,9 @@ jobs:
           [ -n "$CHANGELOG" ] || CHANGELOG="Perfect Mob Farm Revived $MOD_VERSION for Minecraft $MC."
 
           # A jar that is already on CurseForge (marked with a tag once it was uploaded) is not uploaded again
-          tag="curseforge-neoforge-$MC-$MOD_VERSION"
+          tag="curseforge-forge-$MC-$MOD_VERSION"
           if git rev-parse -q --verify "refs/tags/$tag" > /dev/null; then
-            echo "NeoForge $MC $MOD_VERSION is already on CurseForge (tag $tag), not uploading it again"
+            echo "Forge $MC $MOD_VERSION is already on CurseForge (tag $tag), not uploading it again"
             exit 0
           fi
 
@@ -106,12 +104,12 @@ jobs:
           metadata=$(jq -nc \
             --arg changelog "$CHANGELOG" \
             --arg type "$RELEASE_TYPE" \
-            --arg name "PerfectMobFarmRevived-$MC-$MOD_VERSION-NeoForge" \
+            --arg name "PerfectMobFarmRevived-$MC-$MOD_VERSION-Forge" \
             --arg mc "$MC" \
             '{changelog: $changelog, changelogType: "markdown", releaseType: $type, displayName: $name,
-              gameVersionNames: [$mc, "NeoForge", "Client", "Server"]}')
+              gameVersionNames: [$mc, "Forge", "Client", "Server"]}')
 
-          echo "Uploading $jar to CurseForge as a $RELEASE_TYPE for NeoForge $MC"
+          echo "Uploading $jar to CurseForge as a $RELEASE_TYPE for Forge $MC"
           curl -sS --fail-with-body -X POST \
             "https://minecraft.curseforge.com/api/projects/$CURSEFORGE_PROJECT_ID/upload-file" \
             -H "X-Api-Token: $CURSEFORGE_TOKEN" \

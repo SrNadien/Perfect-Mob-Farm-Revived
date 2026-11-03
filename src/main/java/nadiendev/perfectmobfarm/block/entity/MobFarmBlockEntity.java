@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import nadiendev.perfectmobfarm.block.FarmTier;
 import nadiendev.perfectmobfarm.block.MobFarmBlock;
 import nadiendev.perfectmobfarm.config.ServerConfigs;
-import nadiendev.perfectmobfarm.item.DataComponentManager;
 import nadiendev.perfectmobfarm.item.MobShard;
 import nadiendev.perfectmobfarm.item.MobShardData;
 import nadiendev.perfectmobfarm.item.MobSlotUpgrade;
@@ -12,15 +11,12 @@ import nadiendev.perfectmobfarm.item.SpeedUpgrade;
 import nadiendev.perfectmobfarm.screen.MobFarmMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
@@ -46,13 +42,16 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -121,10 +120,11 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     private boolean redstoneDirty = true;
 
     /**
-     * Cache of the item handler of the container below (server side only, created on first use)
+     * Capability handlers: the item handler (shard slots) is exposed on every side and the energy storage (energy
+     * farms only, receive only) too
      */
-    @Nullable
-    private BlockCapabilityCache<IItemHandler, Direction> containerCache;
+    private LazyOptional<IItemHandler> itemHandlerOptional;
+    private LazyOptional<IEnergyStorage> energyStorageOptional;
 
     /**
      * Shard slots: slot 0 is always usable, slot 1 only while a {@link MobSlotUpgrade} is installed
@@ -239,6 +239,8 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
         super(BlockEntityManager.MOB_FARM.get(), pWorldPosition, pBlockState);
         this.usesEnergy = pBlockState.getBlock() instanceof MobFarmBlock farmBlock && farmBlock.usesEnergy();
         this.energyStorage = usesEnergy ? new FarmEnergyStorage() : null;
+        this.itemHandlerOptional = LazyOptional.of(() -> itemHandler);
+        this.energyStorageOptional = energyStorage == null ? LazyOptional.empty() : LazyOptional.of(() -> energyStorage);
     }
 
     @Override
@@ -348,7 +350,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
             if (!isShardSlotUsable(slot) || !(mobShard.getItem() instanceof MobShard) || !MobShard.isComplete(mobShard)) {
                 continue;
             }
-            MobShardData data = mobShard.get(DataComponentManager.MOB_SHARD_DATA.get());
+            MobShardData data = MobShardData.get(mobShard);
             if (data == null) {
                 continue;
             }
@@ -388,7 +390,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
             LOGGER.error("In generateDrop(): Invalid loot table location {}.", data.lootTable());
             return false;
         }
-        LootTable lt = serverLevel.getServer().reloadableRegistries().getLootTable(ResourceKey.create(Registries.LOOT_TABLE, loc));
+        LootTable lt = serverLevel.getServer().getLootData().getLootTable(loc);
 
         Optional<EntityType<?>> optEntityType = EntityType.byString(data.mobId());
         if (optEntityType.isEmpty()) {
@@ -472,15 +474,38 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
         if (level == null) {
             return null;
         }
-        // On the server a capability cache avoids a full lookup each tick
-        if (level instanceof ServerLevel serverLevel) {
-            if (containerCache == null) {
-                containerCache = BlockCapabilityCache.create(Capabilities.ItemHandler.BLOCK, serverLevel,
-                        getBlockPos().below(), Direction.UP);
-            }
-            return containerCache.getCapability();
+        BlockEntity below = level.getBlockEntity(getBlockPos().below());
+        if (below == null) {
+            return null;
         }
-        return level.getCapability(Capabilities.ItemHandler.BLOCK, getBlockPos().below(), Direction.UP);
+        return below.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).resolve().orElse(null);
+    }
+
+    @NotNull
+    @Override
+    public <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if (cap == ForgeCapabilities.ITEM_HANDLER) {
+            return itemHandlerOptional.cast();
+        }
+        // The normal farms have no energy storage, so they expose no energy capability
+        if (cap == ForgeCapabilities.ENERGY && energyStorage != null) {
+            return energyStorageOptional.cast();
+        }
+        return super.getCapability(cap, side);
+    }
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        itemHandlerOptional.invalidate();
+        energyStorageOptional.invalidate();
+    }
+
+    @Override
+    public void reviveCaps() {
+        super.reviveCaps();
+        itemHandlerOptional = LazyOptional.of(() -> itemHandler);
+        energyStorageOptional = energyStorage == null ? LazyOptional.empty() : LazyOptional.of(() -> energyStorage);
     }
 
     /**
@@ -499,7 +524,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
         int lootingLevel = getTier().getLootingLevel();
         if (lootingLevel > 0) {
             weapon = new ItemStack(Items.DIAMOND_SWORD);
-            weapon.enchant(serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.LOOTING), lootingLevel);
+            weapon.enchant(Enchantments.MOB_LOOTING, lootingLevel);
         }
         fakePlayer.setItemInHand(InteractionHand.MAIN_HAND, weapon);
 
@@ -507,7 +532,7 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
                 .withParameter(LootContextParams.ORIGIN, position)
                 .withParameter(LootContextParams.THIS_ENTITY, mob)
                 .withParameter(LootContextParams.DAMAGE_SOURCE, serverLevel.damageSources().playerAttack(fakePlayer))
-                .withParameter(LootContextParams.ATTACKING_ENTITY, fakePlayer)
+                .withParameter(LootContextParams.KILLER_ENTITY, fakePlayer)
                 .withParameter(LootContextParams.LAST_DAMAGE_PLAYER, fakePlayer)
                 .create(LootContextParamSets.ENTITY);
     }
@@ -570,11 +595,11 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
-        super.loadAdditional(pTag, pRegistries);
+    public void load(CompoundTag pTag) {
+        super.load(pTag);
         // The "Size" entry is dropped: a farm saved with the old single slot handler must keep the new handler size
-        itemHandler.deserializeNBT(pRegistries, withoutSize(pTag.getCompound("inventory")));
-        upgradeHandler.deserializeNBT(pRegistries, withoutSize(pTag.getCompound("upgrades")));
+        itemHandler.deserializeNBT(withoutSize(pTag.getCompound("inventory")));
+        upgradeHandler.deserializeNBT(withoutSize(pTag.getCompound("upgrades")));
         isActive = computeActive();
         timer = pTag.getInt("timer");
         if (energyStorage != null) {
@@ -583,10 +608,10 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider pRegistries) {
-        super.saveAdditional(pTag, pRegistries);
-        pTag.put("inventory", itemHandler.serializeNBT(pRegistries));
-        pTag.put("upgrades", upgradeHandler.serializeNBT(pRegistries));
+    protected void saveAdditional(CompoundTag pTag) {
+        super.saveAdditional(pTag);
+        pTag.put("inventory", itemHandler.serializeNBT());
+        pTag.put("upgrades", upgradeHandler.serializeNBT());
         pTag.putBoolean("isActive", isActive);
         pTag.putInt("timer", timer);
         if (energyStorage != null) {
@@ -595,8 +620,8 @@ public class MobFarmBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider pRegistries) {
-        return saveWithoutMetadata(pRegistries);
+    public CompoundTag getUpdateTag() {
+        return saveWithoutMetadata();
     }
 
     @Nullable

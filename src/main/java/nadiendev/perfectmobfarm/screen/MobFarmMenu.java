@@ -7,7 +7,7 @@ import nadiendev.perfectmobfarm.item.MobSlotUpgrade;
 import nadiendev.perfectmobfarm.item.SpeedUpgrade;
 import nadiendev.perfectmobfarm.screen.slot.FarmExtraSlot;
 import nadiendev.perfectmobfarm.screen.slot.MobShardSlot;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -45,7 +45,7 @@ public class MobFarmMenu extends AbstractContainerMenu {
     private final ContainerData data;
 
     /** Client side constructor: the block position is sent by the server as extra data */
-    public MobFarmMenu(int pContainerId, Inventory inv, RegistryFriendlyByteBuf extraData) {
+    public MobFarmMenu(int pContainerId, Inventory inv, FriendlyByteBuf extraData) {
         this(pContainerId, inv, (MobFarmBlockEntity) inv.player.level().getBlockEntity(extraData.readBlockPos()),
                 new SimpleContainerData(MobFarmBlockEntity.DATA_COUNT));
     }

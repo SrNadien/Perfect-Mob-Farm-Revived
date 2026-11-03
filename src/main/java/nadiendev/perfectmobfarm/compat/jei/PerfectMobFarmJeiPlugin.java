@@ -11,7 +11,7 @@ import nadiendev.perfectmobfarm.item.ItemManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.registries.DeferredBlock;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -23,7 +23,7 @@ import java.util.Locale;
  * JEI integration. Optional: the class is only loaded by JEI itself, so the mod works without it.
  * Every reference to the JEI API must stay inside this package.
  * <p>
- * Adds description pages for the mob shards and for every available mob farm.
+ * Adds description pages for the mob shards and for every mob farm.
  */
 @JeiPlugin
 public class PerfectMobFarmJeiPlugin implements IModPlugin {
@@ -67,20 +67,8 @@ public class PerfectMobFarmJeiPlugin implements IModPlugin {
 
     private static void registerFarms(IRecipeRegistration registration) {
         for (FarmTier tier : FarmTier.values()) {
-            DeferredBlock<Block> farm = BlockManager.getBlock(tier);
-            // Null when the tier is not available (its required mod is missing)
-            if (farm == null) {
-                continue;
-            }
-
-            registration.addIngredientInfo(farm.get(), farmLines(tier, false));
-
-            DeferredBlock<Block> energyFarm = BlockManager.getEnergyBlock(tier);
-            if (energyFarm == null) {
-                continue;
-            }
-
-            registration.addIngredientInfo(energyFarm.get(), farmLines(tier, true));
+            registration.addIngredientInfo(BlockManager.getBlock(tier).get(), farmLines(tier, false));
+            registration.addIngredientInfo(BlockManager.getEnergyBlock(tier).get(), farmLines(tier, true));
         }
     }
 

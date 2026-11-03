@@ -1,13 +1,12 @@
 package nadiendev.perfectmobfarm.item;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * Data stored in a linked mob shard (replaces the old NBT tags)
+ * Data stored in the NBT tag of a linked mob shard
  *
  * @param mobName     Display name of the captured mob
  * @param mobId       Entity type id of the captured mob (e.g. minecraft:zombie)
@@ -16,19 +15,37 @@ import net.minecraft.network.codec.StreamCodec;
  */
 public record MobShardData(String mobName, String mobId, String lootTable, int killedCount) {
 
-    public static final Codec<MobShardData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.fieldOf("mob_name").forGetter(MobShardData::mobName),
-            Codec.STRING.fieldOf("mob_id").forGetter(MobShardData::mobId),
-            Codec.STRING.fieldOf("loot_table").forGetter(MobShardData::lootTable),
-            Codec.INT.fieldOf("killed_count").forGetter(MobShardData::killedCount)
-    ).apply(instance, MobShardData::new));
+    private static final String MOB_NAME_KEY = "mobName";
+    private static final String MOB_ID_KEY = "mobId";
+    private static final String LOOT_TABLE_KEY = "lootTable";
+    private static final String KILLED_COUNT_KEY = "killedCount";
 
-    public static final StreamCodec<ByteBuf, MobShardData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, MobShardData::mobName,
-            ByteBufCodecs.STRING_UTF8, MobShardData::mobId,
-            ByteBufCodecs.STRING_UTF8, MobShardData::lootTable,
-            ByteBufCodecs.VAR_INT, MobShardData::killedCount,
-            MobShardData::new);
+    /**
+     * @param stack Any item stack
+     * @return The data stored in the tag of the stack, or null while the stack is not linked to a mob
+     */
+    @Nullable
+    public static MobShardData get(ItemStack stack) {
+        CompoundTag tag = stack.getTag();
+        if (tag == null || !tag.contains(MOB_ID_KEY, Tag.TAG_STRING)) {
+            return null;
+        }
+        return new MobShardData(tag.getString(MOB_NAME_KEY), tag.getString(MOB_ID_KEY),
+                tag.getString(LOOT_TABLE_KEY), tag.getInt(KILLED_COUNT_KEY));
+    }
+
+    /**
+     * Write this data in the tag of the stack, keeping the other tags
+     *
+     * @param stack Stack to link
+     */
+    public void save(ItemStack stack) {
+        CompoundTag tag = stack.getOrCreateTag();
+        tag.putString(MOB_NAME_KEY, mobName);
+        tag.putString(MOB_ID_KEY, mobId);
+        tag.putString(LOOT_TABLE_KEY, lootTable);
+        tag.putInt(KILLED_COUNT_KEY, killedCount);
+    }
 
     public MobShardData withKilledCount(int killedCount) {
         return new MobShardData(mobName, mobId, lootTable, killedCount);

@@ -1,34 +1,31 @@
 package nadiendev.perfectmobfarm.config;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 public class ServerConfigs {
 
-    public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
-    public static final ModConfigSpec SPECS;
+    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final ForgeConfigSpec SPECS;
 
-    public static final ModConfigSpec.ConfigValue<Integer> IRON_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> GOLD_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> DIAMOND_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> EMERALD_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> NETHERITE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> NETHER_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> END_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> ULTIMATE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> MUSHASHITE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> JOANFOITE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> NADIENITE_MOB_FARM_COOLDOWN;
-    public static final ModConfigSpec.ConfigValue<Integer> MOB_SHARD_KILL_NEEDED;
-    public static final ModConfigSpec.ConfigValue<Integer> MOB_SHARD_DURABILITY;
-    public static final ModConfigSpec.ConfigValue<Boolean> MOB_SHARD_UNBREAKABLE;
-    public static final ModConfigSpec.ConfigValue<Integer> ADVANCED_MOB_SHARD_DURABILITY;
-    public static final ModConfigSpec.ConfigValue<Integer> ULTIMATE_MOB_SHARD_DURABILITY;
-    public static final ModConfigSpec.ConfigValue<Boolean> ULTIMATE_MOB_SHARD_UNBREAKABLE;
-    public static final ModConfigSpec.ConfigValue<Integer> ULTIMATE_MOB_SHARD_KILL_NEEDED;
-    public static final ModConfigSpec.ConfigValue<Integer> ENERGY_BASE_PER_TICK;
-    public static final ModConfigSpec.ConfigValue<Double> ENERGY_MULTIPLIER_PER_TIER;
-    public static final ModConfigSpec.ConfigValue<Integer> ENERGY_BUFFER_TICKS;
-    public static final ModConfigSpec.ConfigValue<Integer> SPEED_UPGRADE_REDUCTION_PERCENT;
+    public static final ForgeConfigSpec.ConfigValue<Integer> IRON_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> GOLD_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> DIAMOND_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> EMERALD_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> NETHERITE_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> NETHER_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> END_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ULTIMATE_MOB_FARM_COOLDOWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> MOB_SHARD_KILL_NEEDED;
+    public static final ForgeConfigSpec.ConfigValue<Integer> MOB_SHARD_DURABILITY;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> MOB_SHARD_UNBREAKABLE;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ADVANCED_MOB_SHARD_DURABILITY;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ULTIMATE_MOB_SHARD_DURABILITY;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ULTIMATE_MOB_SHARD_UNBREAKABLE;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ULTIMATE_MOB_SHARD_KILL_NEEDED;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_BASE_PER_TICK;
+    public static final ForgeConfigSpec.ConfigValue<Double> ENERGY_MULTIPLIER_PER_TIER;
+    public static final ForgeConfigSpec.ConfigValue<Integer> ENERGY_BUFFER_TICKS;
+    public static final ForgeConfigSpec.ConfigValue<Integer> SPEED_UPGRADE_REDUCTION_PERCENT;
 
     static {
         BUILDER.push("Perfect Mob farm Configs");
@@ -41,9 +38,6 @@ public class ServerConfigs {
         NETHER_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Nether Mob farm to generate loot (in ticks).").defineInRange("Nether Cooldown", 30, 1, Integer.MAX_VALUE);
         END_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by an End Mob farm to generate loot (in ticks).").defineInRange("End Cooldown", 20, 1, Integer.MAX_VALUE);
         ULTIMATE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by an Ultimate Mob farm to generate loot (in ticks).").defineInRange("Ultimate Cooldown", 10, 1, Integer.MAX_VALUE);
-        MUSHASHITE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Mushashite Mob farm to generate loot (in ticks). Only used when Ultimate Armoury is installed.").defineInRange("Mushashite Cooldown", 6, 1, Integer.MAX_VALUE);
-        JOANFOITE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Joanfoite Mob farm to generate loot (in ticks). Only used when Ultimate Armoury is installed.").defineInRange("Joanfoite Cooldown", 4, 1, Integer.MAX_VALUE);
-        NADIENITE_MOB_FARM_COOLDOWN = BUILDER.comment("Time needed by a Nadienite Mob farm to generate loot (in ticks). Only used when Ultimate Armoury is installed.").defineInRange("Nadienite Cooldown", 1, 1, Integer.MAX_VALUE);
         MOB_SHARD_KILL_NEEDED = BUILDER.comment("Number of kills needed to complete a mob shard.").define("Kill Needed", 10);
         MOB_SHARD_DURABILITY = BUILDER.comment("Durability of a normal mob shard.").define("Normal mob shard durability", 256);
         MOB_SHARD_UNBREAKABLE = BUILDER.comment("If true, normal mob shards are never damaged by the mob farms.").define("Normal mob shard unbreakable", false);
@@ -67,7 +61,7 @@ public class ServerConfigs {
      * @param value Config value
      * @return The configured value, or the default one if the config is not loaded
      */
-    public static int getSafe(ModConfigSpec.ConfigValue<Integer> value) {
+    public static int getSafe(ForgeConfigSpec.ConfigValue<Integer> value) {
         try {
             return value.get();
         } catch (IllegalStateException | NullPointerException e) {
@@ -76,12 +70,12 @@ public class ServerConfigs {
     }
 
     /**
-     * Double version of {@link #getSafe(ModConfigSpec.ConfigValue)}
+     * Double version of {@link #getSafe(ForgeConfigSpec.ConfigValue)}
      *
      * @param value Config value
      * @return The configured value, or the default one if the config is not loaded
      */
-    public static double getSafeDouble(ModConfigSpec.ConfigValue<Double> value) {
+    public static double getSafeDouble(ForgeConfigSpec.ConfigValue<Double> value) {
         try {
             return value.get();
         } catch (IllegalStateException | NullPointerException e) {
@@ -90,12 +84,12 @@ public class ServerConfigs {
     }
 
     /**
-     * Boolean version of {@link #getSafe(ModConfigSpec.ConfigValue)}
+     * Boolean version of {@link #getSafe(ForgeConfigSpec.ConfigValue)}
      *
      * @param value Config value
      * @return The configured value, or the default one if the config is not loaded
      */
-    public static boolean getSafeBoolean(ModConfigSpec.ConfigValue<Boolean> value) {
+    public static boolean getSafeBoolean(ForgeConfigSpec.ConfigValue<Boolean> value) {
         try {
             return value.get();
         } catch (IllegalStateException | NullPointerException e) {

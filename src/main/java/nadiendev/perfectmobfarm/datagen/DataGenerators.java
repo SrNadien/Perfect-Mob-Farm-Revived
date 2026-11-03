@@ -2,7 +2,6 @@ package nadiendev.perfectmobfarm.datagen;
 
 import nadiendev.perfectmobfarm.PerfectMobFarm;
 import nadiendev.perfectmobfarm.datagen.provider.ModBlockLootProvider;
-import nadiendev.perfectmobfarm.datagen.provider.ModConditionalBlockLootProvider;
 import nadiendev.perfectmobfarm.datagen.provider.ModBlockStateProvider;
 import nadiendev.perfectmobfarm.datagen.provider.ModBlockTagProvider;
 import nadiendev.perfectmobfarm.datagen.provider.ModEntityTypeTagProvider;
@@ -12,21 +11,17 @@ import nadiendev.perfectmobfarm.datagen.provider.ModRecipeProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Registers every data provider of the mod. {@link GatherDataEvent} is a mod bus event, so the subscriber
- * is routed to the mod bus automatically.
- * <p>
- * The data run sets the {@code perfectmobfarmrevived.datagen} system property (see build.gradle),
- * so the tiers that depend on other mods are generated too.
+ * Registers every data provider of the mod. {@link GatherDataEvent} is a mod bus event.
  */
-@EventBusSubscriber(modid = PerfectMobFarm.MODID)
+@Mod.EventBusSubscriber(modid = PerfectMobFarm.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class DataGenerators {
 
     private DataGenerators() {
@@ -46,9 +41,8 @@ public class DataGenerators {
         generator.addProvider(event.includeClient(), new ModLanguageProvider(output, "es_es"));
 
         // Server side: recipes, loot tables and tags
-        generator.addProvider(event.includeServer(), new ModRecipeProvider(output, lookupProvider));
-        generator.addProvider(event.includeServer(), ModBlockLootProvider.create(output, lookupProvider));
-        generator.addProvider(event.includeServer(), new ModConditionalBlockLootProvider(output, lookupProvider));
+        generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
+        generator.addProvider(event.includeServer(), ModBlockLootProvider.create(output));
         generator.addProvider(event.includeServer(),
                 new ModBlockTagProvider(output, lookupProvider, existingFileHelper));
         generator.addProvider(event.includeServer(),

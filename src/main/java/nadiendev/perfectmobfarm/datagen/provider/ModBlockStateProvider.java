@@ -8,13 +8,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.neoforge.client.model.generators.BlockModelBuilder;
-import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
-import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.client.model.generators.ModelProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
-import org.jetbrains.annotations.Nullable;
+import net.minecraftforge.client.model.generators.BlockModelBuilder;
+import net.minecraftforge.client.model.generators.BlockStateProvider;
+import net.minecraftforge.client.model.generators.ConfiguredModel;
+import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.common.data.ExistingFileHelper;
 
 /**
  * Generates the blockstates and block models of the mob farms. The item models of the farms
@@ -22,32 +20,22 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ModBlockStateProvider extends BlockStateProvider {
 
-    /** Namespace of the optional mod whose blocks are the material of the integration tiers */
-    private static final String ULTIMATE_ARMOURY = "ultimatearmoury";
-
-    private final ExistingFileHelper existingFileHelper;
-
     public ModBlockStateProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, PerfectMobFarm.MODID, existingFileHelper);
-        this.existingFileHelper = existingFileHelper;
     }
 
     @Override
     protected void registerStatesAndModels() {
         for (FarmTier tier : FarmTier.values()) {
-            farmState(getBlock(tier), farmModel(tier, false));
-            farmState(getEnergyBlock(tier), farmModel(tier, true));
+            farmState(BlockManager.getBlock(tier).get(), farmModel(tier, false));
+            farmState(BlockManager.getEnergyBlock(tier).get(), farmModel(tier, true));
         }
     }
 
     /**
-     * Writes the blockstate of a farm: the model rotated to face the block direction. Does nothing for a null block
-     * (tier that is not available).
+     * Writes the blockstate of a farm: the model rotated to face the block direction.
      */
-    private void farmState(@Nullable Block block, ModelFile model) {
-        if (block == null) {
-            return;
-        }
+    private void farmState(Block block, ModelFile model) {
         getVariantBuilder(block).forAllStates(state -> {
             Direction facing = state.getValue(MobFarmBlock.FACING);
             // Only the horizontal directions rotate the model; up and down reuse the unrotated one
@@ -63,11 +51,6 @@ public class ModBlockStateProvider extends BlockStateProvider {
     private ModelFile farmModel(FarmTier tier, boolean energy) {
         String name = tier.getName() + (energy ? "_energy_mob_farm" : "_mob_farm");
         ResourceLocation material = materialTexture(tier);
-        if (material.getNamespace().equals(ULTIMATE_ARMOURY)) {
-            // The texture belongs to an optional mod that is not present during the data run,
-            // so it is registered as generated to pass the existence check of the model builder
-            existingFileHelper.trackGenerated(material, ModelProvider.TEXTURE);
-        }
 
         BlockModelBuilder builder = models().getBuilder(name)
                 .parent(models().getExistingFile(mcLoc("block/orientable")))
@@ -100,27 +83,13 @@ public class ModBlockStateProvider extends BlockStateProvider {
     /**
      * @return Texture used for the base and the particles of the farm of this tier
      */
-    private static ResourceLocation materialTexture(FarmTier tier) {
+    private ResourceLocation materialTexture(FarmTier tier) {
         return switch (tier) {
             case IRON, GOLD, DIAMOND, EMERALD, NETHERITE ->
-                    ResourceLocation.withDefaultNamespace("block/" + tier.getName() + "_block");
-            case NETHER -> ResourceLocation.withDefaultNamespace("block/nether_bricks");
-            case END -> ResourceLocation.withDefaultNamespace("block/end_stone_bricks");
-            case ULTIMATE -> ResourceLocation.withDefaultNamespace("block/obsidian");
-            case MUSHASHITE, JOANFOITE, NADIENITE ->
-                    ResourceLocation.fromNamespaceAndPath(ULTIMATE_ARMOURY, "block/" + tier.getName() + "_block");
+                    mcLoc("block/" + tier.getName() + "_block");
+            case NETHER -> mcLoc("block/nether_bricks");
+            case END -> mcLoc("block/end_stone_bricks");
+            case ULTIMATE -> mcLoc("block/obsidian");
         };
-    }
-
-    @Nullable
-    private static Block getBlock(FarmTier tier) {
-        var farm = BlockManager.getBlock(tier);
-        return farm == null ? null : farm.get();
-    }
-
-    @Nullable
-    private static Block getEnergyBlock(FarmTier tier) {
-        var farm = BlockManager.getEnergyBlock(tier);
-        return farm == null ? null : farm.get();
     }
 }

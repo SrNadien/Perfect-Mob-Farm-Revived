@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:iron_block"
+    },
+    "B": {
+      "item": "minecraft:bone"
+    },
+    "P": {
+      "item": "perfectmobfarmrevived:mob_shard"
+    },
+    "R": {
+      "item": "minecraft:rotten_flesh"
+    }
+  },
+  "pattern": [
+    "#R#",
+    "BPB",
+    "#R#"
+  ],
+  "result": {
+    "item": "perfectmobfarmrevived:iron_mob_farm"
+  },
+  "show_notification": true
+}

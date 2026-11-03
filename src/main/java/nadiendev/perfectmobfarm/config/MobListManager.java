@@ -14,7 +14,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
-import net.neoforged.fml.loading.FMLPaths;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class MobListManager {
         if (!loaded) {
             load();
         }
-        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+        ResourceLocation id = EntityType.getKey(type);
         if (jsonBlacklist.contains(id) || type.is(BLACKLIST_TAG)) {
             return false;
         }

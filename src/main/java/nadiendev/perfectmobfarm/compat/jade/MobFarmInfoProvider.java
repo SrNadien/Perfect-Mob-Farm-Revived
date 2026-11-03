@@ -3,7 +3,6 @@ package nadiendev.perfectmobfarm.compat.jade;
 import nadiendev.perfectmobfarm.PerfectMobFarm;
 import nadiendev.perfectmobfarm.block.entity.MobFarmBlockEntity;
 import nadiendev.perfectmobfarm.config.ServerConfigs;
-import nadiendev.perfectmobfarm.item.DataComponentManager;
 import nadiendev.perfectmobfarm.item.MobShard;
 import nadiendev.perfectmobfarm.item.MobShardData;
 import net.minecraft.ChatFormatting;
@@ -92,7 +91,7 @@ public enum MobFarmInfoProvider implements IBlockComponentProvider, IServerDataP
      */
     private static void putShard(CompoundTag data, ItemStack shard, String hasKey, String nameKey) {
         MobShardData shardData = shard.getItem() instanceof MobShard
-                ? shard.get(DataComponentManager.MOB_SHARD_DATA.get()) : null;
+                ? MobShardData.get(shard) : null;
         if (shardData != null) {
             data.putBoolean(hasKey, true);
             data.putString(nameKey, shardData.mobName());
@@ -163,7 +162,7 @@ public enum MobFarmInfoProvider implements IBlockComponentProvider, IServerDataP
             tooltip.add(helper.progress(progress,
                     Component.literal(Math.round(progress * 100) + "%"),
                     helper.progressStyle().color(PROGRESS_COLOR),
-                    BoxStyle.getNestedBox(),
+                    BoxStyle.DEFAULT,
                     true));
         }
 

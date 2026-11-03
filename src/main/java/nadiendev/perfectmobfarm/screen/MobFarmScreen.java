@@ -16,7 +16,7 @@ import java.util.Locale;
 public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
 
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(PerfectMobFarm.MODID, "textures/gui/mobfarm-gui-2.png");
+            new ResourceLocation(PerfectMobFarm.MODID, "textures/gui/mobfarm-gui-2.png");
 
     /** Progress bar groove, relative to the top left corner of the gui */
     private static final int BAR_X = 152;
@@ -116,7 +116,8 @@ public class MobFarmScreen extends AbstractContainerScreen<MobFarmMenu> {
 
     @Override
     public void render(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        // In 1.21.1 Screen#render already draws the background (a second renderBackground call would blur twice and crash)
+        // In 1.20.1 the background (darkened world) is drawn by the screen itself
+        renderBackground(pGuiGraphics);
         super.render(pGuiGraphics, pMouseX, pMouseY, pPartialTick);
         renderTooltip(pGuiGraphics, pMouseX, pMouseY);
         renderEmptySlotTooltip(pGuiGraphics, pMouseX, pMouseY);

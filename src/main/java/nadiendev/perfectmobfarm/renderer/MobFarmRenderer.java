@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import nadiendev.perfectmobfarm.block.MobFarmBlock;
 import nadiendev.perfectmobfarm.block.entity.MobFarmBlockEntity;
-import nadiendev.perfectmobfarm.item.DataComponentManager;
 import nadiendev.perfectmobfarm.item.MobShard;
 import nadiendev.perfectmobfarm.item.MobShardData;
 import net.minecraft.client.Minecraft;
@@ -86,7 +85,7 @@ public class MobFarmRenderer implements BlockEntityRenderer<MobFarmBlockEntity> 
         if (!(itemHeld.getItem() instanceof MobShard)) {
             return null;
         }
-        MobShardData data = itemHeld.get(DataComponentManager.MOB_SHARD_DATA.get());
+        MobShardData data = MobShardData.get(itemHeld);
         if (data == null || !MobShard.isComplete(itemHeld)) {
             return null;
         }
