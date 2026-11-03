@@ -23,13 +23,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Gradle itself runs on JDK 25, the Java 21 toolchain of the project is provisioned from this too
-      - name: Set up JDKs
+      # Gradle 8.11 cannot run on a newer JDK than 23 (it fails on JDK 25), and the project targets Java 21, so JDK 21
+      # is the only one installed: it runs Gradle and it is the toolchain of the project
+      - name: Set up JDK
         uses: actions/setup-java@v6
         with:
-          java-version: |
-            21
-            25
+          java-version: "21"
           distribution: "temurin"
 
       - name: Read Version
