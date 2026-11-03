@@ -2,11 +2,12 @@
 # silently rot until a runtime deprecation breaks a release.
 #
 # Dependabot only reads this file from the default branch (Neo/1.21.1) and, without a target-branch, only updates
-# that branch. Every other version branch therefore has its own entry below.
+# that branch. Every version branch, the default one included, therefore has its own entry below.
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "Neo/1.21.1"
     schedule:
       interval: "monthly"
     commit-message:
